@@ -9,7 +9,7 @@ namespace BattleScene {
 	/// </summary>
 	public class Deck {
         [SerializeField]
-        private Card m_Card;            // カードプレふぁぶ
+        private Card m_Card;            // カードプレファブ
 		private List<Card> m_CardList;	// デッキ情報
 
 		/// <summary>
