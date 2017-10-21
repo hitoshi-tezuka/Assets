@@ -5,7 +5,7 @@ using System;
 namespace BattleScene
 {
 
-    public class CopperCoin : Card
+    public class CoinCard : Card
     {
 
         public override Effect GetEffect()
