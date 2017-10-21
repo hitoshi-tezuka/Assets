@@ -7,10 +7,15 @@ namespace BattleScene {
 	/// <summary>
 	/// デッキ
 	/// </summary>
-	public class Deck {
+	public class Deck:MonoBehaviour {
         [SerializeField]
-        private Card m_Card;            // カードプレファブ
-		private List<Card> m_CardList;	// デッキ情報
+        private GameObject m_CoinCard;      // コインカード
+        [SerializeField]
+        private GameObject m_ActionCard;    // アクションカード
+        [SerializeField]
+        private GameObject m_PointCard;     // 領地カード
+
+        private List<Card> m_CardList;	    // デッキ情報
 
 		/// <summary>
 		/// カード追加処理
@@ -44,15 +49,16 @@ namespace BattleScene {
 		{
 			for(int i=0;i<3;i++)
 			{
-                
+                var coin = Instantiate(m_CoinCard);
                 Card copperCoin = new CoinCard();
                 copperCoin.Setup("test", 1);
                 AddCard(copperCoin);
 			}
             for(int i=0;i<7;i++)
             {
-                Card terrytory = new TerrytoryCard();
-                AddCard(terrytory);
+                var point = Instantiate(m_PointCard);
+                Card mansion = new PointCard();
+                AddCard(mansion);
             }
 		}
 

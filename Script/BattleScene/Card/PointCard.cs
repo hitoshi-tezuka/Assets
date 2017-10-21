@@ -2,7 +2,7 @@
 using System;
 
 namespace BattleScene { 
-    public class TerrytoryCard : Card
+    public class PointCard : Card
     {
         public override Effect GetEffect()
         {
