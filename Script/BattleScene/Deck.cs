@@ -45,7 +45,7 @@ namespace BattleScene {
 			for(int i=0;i<3;i++)
 			{
                 
-                Card copperCoin = new CopperCoin();
+                Card copperCoin = new CoinCard();
                 copperCoin.Setup("test", 1);
                 AddCard(copperCoin);
 			}
