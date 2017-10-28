@@ -20,8 +20,7 @@ namespace BattleScene {
 		/// <param name="purchaseMoney">購入金額</param>
 		public void Setup(string description, int purchaseMoney, RawImage image = null)
 		{
-            Instantiate(this);
-			CardImage = image;
+			// CardImage = image;
 			CardDescription.text = description;
 			m_purchaseMoney = purchaseMoney;
 		}

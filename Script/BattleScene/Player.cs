@@ -10,8 +10,9 @@ namespace BattleScene {
 		private ScrollRect m_Hand;
         [SerializeField]
 		private Status m_Status;
+        [SerializeField]
+        private Deck m_Deck;
 
-		private Deck m_Deck;
 		private BattleSceneManager.PlayerTurn m_ProcessingTurn;
         private const int CLEANUPCARDNUM = 5;
 
@@ -44,10 +45,8 @@ namespace BattleScene {
 
 		public void Initialize()
 		{
-            Instantiate(this);
 			m_Hand.horizontalNormalizedPosition = 0;
 			m_Status.Setup(0, 0, 0, 0);
-			m_Deck = new Deck();
             m_Deck.Initialize();
             AddHand(CLEANUPCARDNUM);
 		}
@@ -56,7 +55,7 @@ namespace BattleScene {
         {
             foreach(var card in m_Deck.GetCard(addNum))
             {
-                
+                card.transform.SetParent(m_Hand.content);
             }
         }
 	}

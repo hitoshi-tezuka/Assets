@@ -82,6 +82,7 @@ namespace BattleScene {
                 var playerPrefab = Instantiate(m_PlayerPrefab,this.transform.Find("StageCanvas"));
                 Player player = playerPrefab.GetComponent<Player>();
                 player.Initialize();
+                player.transform.localPosition = Vector3.zero;
 				m_PlayerList.Add(player);
 			}
 		}

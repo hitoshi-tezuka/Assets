@@ -8,14 +8,11 @@ namespace BattleScene {
 	/// デッキ
 	/// </summary>
 	public class Deck:MonoBehaviour {
-        [SerializeField]
-        private GameObject m_CoinCard;      // コインカード
-        [SerializeField]
-        private GameObject m_ActionCard;    // アクションカード
-        [SerializeField]
-        private GameObject m_PointCard;     // 領地カード
+        [SerializeField] private CoinCard   m_CoinCard;         // コインカード
+        [SerializeField] private ActionCard m_ActionCard;       // アクションカード
+        [SerializeField] private PointCard  m_PointCard;        // 領地カード
 
-        private List<Card> m_CardList;	    // デッキ情報
+        private List<Card> m_CardList;	                        // デッキ情報
 
 		/// <summary>
 		/// カード追加処理
@@ -47,18 +44,23 @@ namespace BattleScene {
         /// </summary>
 		public void Initialize() 
 		{
-			for(int i=0;i<3;i++)
+            m_CardList = new List<Card>();
+
+            for (int i=0;i<3;i++)
 			{
-                var coin = Instantiate(m_CoinCard);
-                Card copperCoin = new CoinCard();
-                copperCoin.Setup("test", 1);
-                AddCard(copperCoin);
+                var coin = Instantiate<Card>(m_CoinCard);
+                coin.Setup("coin", 1);
+                coin.transform.SetParent(this.transform);
+                coin.transform.localPosition = Vector3.zero;
+                AddCard(coin);
 			}
             for(int i=0;i<7;i++)
             {
-                var point = Instantiate(m_PointCard);
-                Card mansion = new PointCard();
-                AddCard(mansion);
+                var point = Instantiate<Card>(m_PointCard);
+                point.transform.SetParent(this.transform);
+                point.transform.localPosition = Vector3.zero;
+                point.Setup("point",1);
+                AddCard(point);
             }
 		}
 
