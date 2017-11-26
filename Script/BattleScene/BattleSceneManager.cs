@@ -1,12 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Database;
 
 namespace BattleScene { 
 	public class BattleSceneManager : MonoBehaviour {
 
         [SerializeField]
         private GameObject m_PlayerPrefab;
+        [SerializeField]
+        private DataBaseController m_DatabaseController;
         
         #region  データ定義
 		// 処理ターン
@@ -53,11 +56,16 @@ namespace BattleScene {
 			switch(m_ProcessingTurn)
 			{
 				case TurnType.OrderPlayer:
-					// プレイヤーを一定の条件でシャッフルする
-
-					break;
+                    // プレイヤーを一定の条件でシャッフルする
+                    m_ProcessingTurn = TurnType.SelectCard;
+                    break;
 				case TurnType.SelectCard:
-					// どのカードでゲーム開始を行うか
+                    // どのカードでゲーム開始を行うか
+                    foreach( var card in m_DatabaseController.SelectCardMaster())
+                    {
+                        Debug.Log( card.Card);
+                    }
+                    m_ProcessingTurn = TurnType.PlayerTurn;
 					break;
 				case TurnType.PlayerTurn:
 					// ゲーム開始を行う
