@@ -57,9 +57,9 @@ namespace Database
 	    /// <summary>
 	    /// カードマスタテーブルから1件取得
 	    /// </summary>
-	    /// <param name="id">shop id</param>
+	    /// <param name="id">id</param>
 	    /// <returns></returns>
-	    public CardMasterData SelectCardMaster(int id)
+	    public CardMasterData SelectCardMaster(string id)
 	    {
 		    // 以下は実際に使用する時の使い方の例
 		    MyDatabase db = MyDatabase.Instance;

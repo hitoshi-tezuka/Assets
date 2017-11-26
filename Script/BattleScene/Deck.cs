@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Database;
 
 namespace BattleScene { 
 
@@ -42,10 +43,20 @@ namespace BattleScene {
         /// <summary>
         /// 初期化
         /// </summary>
-		public void Initialize() 
+		public void Initialize(List<CardMasterData> cardList) 
 		{
             m_CardList = new List<Card>();
 
+            foreach(var card in cardList)
+            {
+                var coin = Instantiate<Card>(m_CoinCard);
+                coin.Setup(card.CardName,card.CostCoin);
+                coin.transform.SetParent(this.transform);
+                coin.transform.localPosition = Vector3.zero;
+                AddCard(coin);
+            }
+
+            /*
             for (int i=0;i<3;i++)
 			{
                 var coin = Instantiate<Card>(m_CoinCard);
@@ -62,7 +73,8 @@ namespace BattleScene {
                 point.Setup("point",1);
                 AddCard(point);
             }
-		}
+            */
+        }
 
 	}
 }

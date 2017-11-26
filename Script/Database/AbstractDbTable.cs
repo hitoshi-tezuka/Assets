@@ -116,6 +116,37 @@ namespace Database
         }
 
         /// <summary>
+        /// 主キーを指定して該当するデータを取得する
+        /// </summary>
+        /// <param name="id">主キー[shopid,machineid,machineNumber]</param>
+        /// <returns>データ、ただし存在しない場合はnull</returns>
+        public T SelectFromPrimaryKey(params string[] id)
+        {
+            StringBuilder query = new StringBuilder();
+            query.Append("SELECT * FROM ");
+            query.Append(TableName);
+            query.Append(" WHERE ");
+            for (int i = 0; i < PrimaryKeyName.Length; i++)
+            {
+                query.Append(PrimaryKeyName[i]);
+                query.Append("=");
+                query.Append("'" + id[i].ToString()+ "'");
+                if (i < PrimaryKeyName.Length - 1)  // 最終条件には接続詞をつけない
+                    query.Append(" AND ");
+            }
+            query.Append(";");
+            DataTable dt = mDb.ExecuteQuery(query.ToString());
+            if (dt.Rows.Count == 0)
+            {
+                return null;
+            }
+            else
+            {
+                return PutData(dt[0]);
+            }
+        }
+
+        /// <summary>
         /// 全データを取得する
         /// </summary>
         /// <returns>データリスト</returns>

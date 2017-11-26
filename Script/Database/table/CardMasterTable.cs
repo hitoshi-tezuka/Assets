@@ -32,22 +32,22 @@ namespace Database
 
     public class CardMasterTable : AbstractDbTable<CardMasterData>
     {
-        private const string COL_CARD = "Card";
-        private const string COL_IMAGENAME = "ImageName";
-        private const string COL_CARDNAME = "CardName";
-        private const string COL_SETTYPE = "SetType";
-        private const string COL_COSTCOIN = "CostCoin";
-        private const string COL_COSTPOTISION = "CostPotion";
-        private const string COL_COSTLIABILITIES = "CostLiabilities";
-        private const string COL_CLASSIFICATION = "Classification ";
-        private const string COL_CARDTYPE = "CardType";
-        private const string COL_TREASURE = "Treasure";
-        private const string COL_VICTORYPOINT = "VictoryPoint";
-        private const string COL_PLUSCARD = "PlusCard";
-        private const string COL_PLUSACTION = "PlusAction";
-        private const string COL_PLUSPURCHASE = "PlusPurchase";
-        private const string COL_PLUSCOIN = "PlusCoin";
-        private const string COL_PLUSVICTORYPOINTTOKEN = "PlusVictoryPointToken";
+        private const string COL_CARD = "Card";                                     // カード名(英語）（主キー）
+        private const string COL_IMAGENAME = "ImageName";                           // カード画像名
+        private const string COL_CARDNAME = "CardName";                             // カード名
+        private const string COL_SETTYPE = "SetType";                               // セット
+        private const string COL_COSTCOIN = "CostCoin";                             // コストコイン
+        private const string COL_COSTPOTISION = "CostPotion";                       // コストポーション
+        private const string COL_COSTLIABILITIES = "CostLiabilities";               // コスト負債
+        private const string COL_CLASSIFICATION = "Classification ";                // 分類
+        private const string COL_CARDTYPE = "CardType";                             // カード種類
+        private const string COL_TREASURE = "Treasure";                             // 財宝      
+        private const string COL_VICTORYPOINT = "VictoryPoint";                     // 勝利点
+        private const string COL_PLUSCARD = "PlusCard";                             // ＋カード
+        private const string COL_PLUSACTION = "PlusAction";                         // ＋アクション
+        private const string COL_PLUSPURCHASE = "PlusPurchase";                     // ＋購入
+        private const string COL_PLUSCOIN = "PlusCoin";                             // ＋コイン
+        private const string COL_PLUSVICTORYPOINTTOKEN = "PlusVictoryPointToken";   // ＋勝利点トークン
 
         protected override string[] PrimaryKeyName { get { string[] str = { "Card" }; return str; } }
 

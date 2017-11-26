@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Database;
 
 namespace BattleScene { 
 	public class Player : MonoBehaviour {
@@ -43,11 +44,11 @@ namespace BattleScene {
 			}
 		}
 
-		public void Initialize()
+		public void Initialize(List<CardMasterData> cardList)
 		{
 			m_Hand.horizontalNormalizedPosition = 0;
 			m_Status.Setup(0, 0, 0, 0);
-            m_Deck.Initialize();
+            m_Deck.Initialize(cardList);
             AddHand(CLEANUPCARDNUM);
 		}
 

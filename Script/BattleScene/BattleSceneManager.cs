@@ -73,7 +73,6 @@ namespace BattleScene {
 					// プレイヤーがターン終了するまで他のプレイヤーは待機
 					Player nowPlayer = m_PlayerList[0];
 
-
 					break;
 			}
 		}
@@ -82,17 +81,36 @@ namespace BattleScene {
 		public void Initialize()
 		{
 			m_ProcessingTurn = TurnType.OrderPlayer;
+            // デッキ初期化
+            List<CardMasterData> cardlist = InitializeDeck();
 
-			// プレイヤー作成
-			List<Player> list = new List<Player>();
+            // プレイヤー作成
+            List<Player> list = new List<Player>();
 			for(int i = 0; i<1;i++)
 			{
                 var playerPrefab = Instantiate(m_PlayerPrefab,this.transform.Find("StageCanvas"));
                 Player player = playerPrefab.GetComponent<Player>();
-                player.Initialize();
+                player.Initialize(cardlist);
                 player.transform.localPosition = Vector3.zero;
 				m_PlayerList.Add(player);
 			}
 		}
+
+        private List<CardMasterData> InitializeDeck()
+        {
+            var cardlist =new List<CardMasterData>();
+            var cardEstate = m_DatabaseController.SelectCardMaster("Estate");
+            var cardCopper = m_DatabaseController.SelectCardMaster("Copper");
+            for (int i = 0; i < 3; i++)
+            {
+                cardlist.Add(cardEstate);
+            }
+            for (int i = 0; i < 7; i++)
+            {
+                cardlist.Add(cardCopper);
+            }
+            return cardlist;
+
+        }
 	}
 }
