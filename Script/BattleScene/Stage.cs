@@ -9,7 +9,7 @@ namespace BattleScene {
     public class Stage : MonoBehaviour,IDropHandler {
 
         [SerializeField]
-        private ScrollRect m_Stage;
+        private RectTransform m_Field;
 
 	    // Use this for initialization
 	    void Start () {
@@ -23,7 +23,8 @@ namespace BattleScene {
 
         public void AddCard(Card card)
         {
-            card.transform.SetParent(m_Stage.content);
+            card.transform.SetParent(m_Field);
+            card.transform.localPosition = Vector3.zero;
         }
 
 

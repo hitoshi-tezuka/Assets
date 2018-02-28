@@ -4,7 +4,7 @@ using Database;
 using UnityEngine.EventSystems;
 
 namespace BattleScene { 
-	public abstract class Card : MonoBehaviour,IDragHandler{
+	public abstract class Card : MonoBehaviour,IDragHandler,IBeginDragHandler,IEndDragHandler{
 
 		[SerializeField] private RawImage m_CardImage;
 		[SerializeField] private Text m_CardDescription;
@@ -42,6 +42,21 @@ namespace BattleScene {
 
         public void OnDrag(PointerEventData pointerEventData)
         {
+            var rect = this.transform.parent.parent.GetComponent<ScrollRect>();
+            rect.OnDrag(pointerEventData);
         }
-	}
+
+        public void OnBeginDrag(PointerEventData pointerEventData)
+        {
+            var rect = this.transform.parent.parent.GetComponent<ScrollRect>();
+            rect.OnBeginDrag(pointerEventData);
+        }
+
+        public void OnEndDrag(PointerEventData pointerEventData)
+        {
+            var rect = this.transform.parent.parent.GetComponent<ScrollRect>();
+            if (rect != null)
+                rect.OnEndDrag(pointerEventData);
+        }
+    }
 } 
