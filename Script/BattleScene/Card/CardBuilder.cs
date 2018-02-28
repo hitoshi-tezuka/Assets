@@ -11,11 +11,16 @@ namespace BattleScene
         private GameObject m_PointCard;
         private GameObject m_ActionCard;
 
+        private const string COINCARDPATH = "card/CoinCard";
+        private const string POINTCARDPATH = "card/PointCard";
+        private const string ACTIONCARDPATH = "card/ActionCard";
+
+
         public CardBuilder()
         {
-            m_CoinCard = Resources.Load("card/CoinCard") as GameObject;
-            m_PointCard = Resources.Load("card/PointCard") as GameObject;
-            m_ActionCard = Resources.Load("card/ActionCard") as GameObject;
+            m_CoinCard = Resources.Load(COINCARDPATH) as GameObject;
+            m_PointCard = Resources.Load(POINTCARDPATH) as GameObject;
+            m_ActionCard = Resources.Load(ACTIONCARDPATH) as GameObject;
         }
 
         public Card CreateCard(CardMasterData data)
