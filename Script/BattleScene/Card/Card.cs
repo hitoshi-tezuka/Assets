@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using Database;
+using UnityEngine.EventSystems;
 
 namespace BattleScene { 
-	public abstract class Card : MonoBehaviour {
+	public abstract class Card : MonoBehaviour,IDragHandler{
 
 		[SerializeField] private RawImage m_CardImage;
 		[SerializeField] private Text m_CardDescription;
@@ -39,5 +40,8 @@ namespace BattleScene {
 		/// </summary>
 		public abstract Effect GetEffect();
 
+        public void OnDrag(PointerEventData pointerEventData)
+        {
+        }
 	}
 } 
