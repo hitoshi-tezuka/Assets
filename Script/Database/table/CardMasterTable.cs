@@ -6,6 +6,16 @@ namespace Database
 { 
     public class CardMasterData : AbstractData
     {
+
+        public enum CardType
+        {
+            TREASURE = 10,
+            VICTORYPOINT = 20,
+            CURSE = 30,
+            ACTION = 40,
+            ATTACKACTION = 41,
+        }
+
         public string Card = string.Empty;
         public string ImageName = string.Empty;
         public string CardName = string.Empty;
@@ -14,7 +24,7 @@ namespace Database
         public int CostPotion = 0;
         public int CostLiabilities = 0;
         public int Classification = 0;
-        public int CardType = 0;
+        public CardType CardTypes = 0;
         public int Treasure = 0;
         public int VictoryPoint = 0;
         public int PlusCard = 0;
@@ -22,7 +32,6 @@ namespace Database
         public int PlusPurchase = 0;
         public int PlusCoin = 0;
         public int PlusVictoryPointToken = 0;
-
 
         public override void DebugPrint()
         {
@@ -76,7 +85,7 @@ namespace Database
             card.CostPotion = GetIntValue(row, COL_COSTPOTISION);
             card.CostLiabilities = GetIntValue(row, COL_COSTLIABILITIES);
             card.Classification = GetIntValue(row, COL_CLASSIFICATION);
-            card.CardType = GetIntValue(row, COL_CARDTYPE);
+            card.CardTypes = (CardMasterData.CardType)GetIntValue(row, COL_CARDTYPE);
             card.Treasure = GetIntValue(row, COL_TREASURE);
             card.VictoryPoint = GetIntValue(row, COL_VICTORYPOINT);
             card.PlusCard = GetIntValue(row, COL_PLUSCARD);
@@ -86,7 +95,6 @@ namespace Database
             card.PlusVictoryPointToken = GetIntValue(row, COL_PLUSVICTORYPOINTTOKEN);
             return card;
         }
-
 
     }
 

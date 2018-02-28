@@ -3,17 +3,19 @@ using System.Collections.Generic;
 using UnityEngine;
 using Database;
 
-namespace BattleScene { 
+namespace BattleScene {
 
 	/// <summary>
 	/// デッキ
 	/// </summary>
 	public class Deck:MonoBehaviour {
-        [SerializeField] private CoinCard   m_CoinCard;         // コインカード
-        [SerializeField] private ActionCard m_ActionCard;       // アクションカード
-        [SerializeField] private PointCard  m_PointCard;        // 領地カード
+		[SerializeField] private CoinCard   m_CoinCard;         // コインカード
+		[SerializeField] private ActionCard m_ActionCard;       // アクションカード
+		[SerializeField] private PointCard  m_PointCard;        // 領地カード
 
-        private List<Card> m_CardList;	                        // デッキ情報
+		private List<Card> m_CardList;	                        // デッキ情報
+
+		private CardBuilder m_CardBulider;
 
 		/// <summary>
 		/// カード追加処理
@@ -30,51 +32,31 @@ namespace BattleScene {
 		/// <returns></returns>
 		public Card[] GetCard(int num)
 		{
-            List<Card> cards = new List<Card>();
-            for(int i=0;i<num;i++)
-            { 
-			    var getCard = m_CardList[Random.Range(0,m_CardList.Count)];
-                cards.Add(getCard);
-                m_CardList.Remove(getCard);
-            }
-            return cards.ToArray();
-        }
-
-        /// <summary>
-        /// 初期化
-        /// </summary>
+			List<Card> cards = new List<Card>();
+			for(int i=0;i<num;i++)
+			{ 
+				var getCard = m_CardList[Random.Range(0,m_CardList.Count)];
+				cards.Add(getCard);
+				m_CardList.Remove(getCard);
+			}
+			return cards.ToArray();
+		}
+   
+		/// <summary>
+		/// 初期化
+		/// </summary>
 		public void Initialize(List<CardMasterData> cardList) 
 		{
-            m_CardList = new List<Card>();
+			m_CardBulider = new CardBuilder();
+			m_CardList = new List<Card>();
 
-            foreach(var card in cardList)
-            {
-                var coin = Instantiate<Card>(m_CoinCard);
-                coin.Setup(card.CardName,card.CostCoin);
-                coin.transform.SetParent(this.transform);
-                coin.transform.localPosition = Vector3.zero;
-                AddCard(coin);
-            }
-
-            /*
-            for (int i=0;i<3;i++)
+			foreach (var card in cardList)
 			{
-                var coin = Instantiate<Card>(m_CoinCard);
-                coin.Setup("coin", 1);
-                coin.transform.SetParent(this.transform);
-                coin.transform.localPosition = Vector3.zero;
-                AddCard(coin);
+				var content = m_CardBulider.CreateCard(card);
+				content.transform.SetParent(this.transform);
+				content.transform.localPosition = Vector3.zero;
+				AddCard(content);
 			}
-            for(int i=0;i<7;i++)
-            {
-                var point = Instantiate<Card>(m_PointCard);
-                point.transform.SetParent(this.transform);
-                point.transform.localPosition = Vector3.zero;
-                point.Setup("point",1);
-                AddCard(point);
-            }
-            */
-        }
-
+		}
 	}
 }

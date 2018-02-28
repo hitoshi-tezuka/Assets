@@ -5,193 +5,191 @@ using System.Collections.Generic;
 
 namespace Database
 { 
-    public class DataBaseController : MonoBehaviour, MyDatabaseListener {
+	public class DataBaseController : MonoBehaviour, MyDatabaseListener {
 
-	    // Use this for initialization
-	    void Awake () {
-		    // データベース初期化、ゲーム起動時などで1回だけ実行すればOK
-		    MyDatabase.Init(this, this);
-	    }
+		// Use this for initialization
+		void Awake () {
+			// データベース初期化、ゲーム起動時などで1回だけ実行すればOK
+			MyDatabase.Init(this, this);
+		}
 
-	    public void OnDatabaseInit() {
-		    // データベースの初期化の後に行いたい処理を実装する、例えばデータベース内の値を使った他の何かの初期化とか
-	    }
+		public void OnDatabaseInit() {
+			// データベースの初期化の後に行いたい処理を実装する、例えばデータベース内の値を使った他の何かの初期化とか
+		}
 
+		private void Sample() {
+			// 以下は実際に使用する時の使い方の例
+			MyDatabase db = MyDatabase.Instance;
 
+			// データベースのテーブルを取得
+			DummyMasterTable dummyMasterTable = db.GetDummyMasterTable();
+			// 1行分のデータを格納するクラス
+			DummyMasterData dummyMasterData;
 
-	    private void Sample() {
-		    // 以下は実際に使用する時の使い方の例
-		    MyDatabase db = MyDatabase.Instance;
+			// 主キーによるSelect
+			dummyMasterData = dummyMasterTable.SelectFromPrimaryKey(1);
 
-		    // データベースのテーブルを取得
-		    DummyMasterTable dummyMasterTable = db.GetDummyMasterTable();
-		    // 1行分のデータを格納するクラス
-		    DummyMasterData dummyMasterData;
+			// 1行分のデータのデバッグログ出力もできます
+			dummyMasterData.DebugPrint();
 
-		    // 主キーによるSelect
-		    dummyMasterData = dummyMasterTable.SelectFromPrimaryKey(1);
+			// 全行取得
+			foreach (DummyMasterData data in dummyMasterTable.SelectAll()) {
+				// ループ処理
+				data.DebugPrint();
+			}
 
-		    // 1行分のデータのデバッグログ出力もできます
-		    dummyMasterData.DebugPrint();
+			// InsertまたはUpdate
+			// ※同一の主キーのデータがあればUpdate、無ければInsertとなる
+			dummyMasterData.id = 1;
+			dummyMasterData.dummyText = "hogehoge";
+			dummyMasterData.dummyBool = false;
+			dummyMasterTable.Update(dummyMasterData);
 
-		    // 全行取得
-		    foreach (DummyMasterData data in dummyMasterTable.SelectAll()) {
-			    // ループ処理
-			    data.DebugPrint();
-		    }
+			// 主キーによるDelete
+			dummyMasterTable.DeleteFromPrimaryKey(1);
 
-		    // InsertまたはUpdate
-		    // ※同一の主キーのデータがあればUpdate、無ければInsertとなる
-		    dummyMasterData.id = 1;
-		    dummyMasterData.dummyText = "hogehoge";
-		    dummyMasterData.dummyBool = false;
-		    dummyMasterTable.Update(dummyMasterData);
+			// 全行削除
+			dummyMasterTable.DeleteAll();
+		}
 
-		    // 主キーによるDelete
-		    dummyMasterTable.DeleteFromPrimaryKey(1);
+		/// <summary>
+		/// カードマスタテーブルから1件取得
+		/// </summary>
+		/// <param name="id">id</param>
+		/// <returns></returns>
+		public CardMasterData SelectCardMaster(string id)
+		{
+			// 以下は実際に使用する時の使い方の例
+			MyDatabase db = MyDatabase.Instance;
 
-		    // 全行削除
-		    dummyMasterTable.DeleteAll();
-	    }
+			// データベースのテーブルを取得
+			CardMasterTable cardMasterTable = db.GetCardMasterTable();
 
-	    /// <summary>
-	    /// カードマスタテーブルから1件取得
-	    /// </summary>
-	    /// <param name="id">id</param>
-	    /// <returns></returns>
-	    public CardMasterData SelectCardMaster(string id)
-	    {
-		    // 以下は実際に使用する時の使い方の例
-		    MyDatabase db = MyDatabase.Instance;
+			return cardMasterTable.SelectFromPrimaryKey(id);
+		}
 
-            // データベースのテーブルを取得
-            CardMasterTable cardMasterTable = db.GetCardMasterTable();
+		/// <summary>
+		/// カードマスタテーブルから全件取得
+		/// </summary>
+		/// <param name="id">shop id</param>
+		/// <returns></returns>
+		public List<CardMasterData> SelectCardMaster()
+		{
+			// 以下は実際に使用する時の使い方の例
+			MyDatabase db = MyDatabase.Instance;
 
-		    return cardMasterTable.SelectFromPrimaryKey(id);
-        }
+			// データベースのテーブルを取得
+			CardMasterTable cardMasterTable = db.GetCardMasterTable();
 
-        /// <summary>
-        /// カードマスタテーブルから全件取得
-        /// </summary>
-        /// <param name="id">shop id</param>
-        /// <returns></returns>
-        public List<CardMasterData> SelectCardMaster()
-        {
-            // 以下は実際に使用する時の使い方の例
-            MyDatabase db = MyDatabase.Instance;
+			return cardMasterTable.SelectAll();
+		}
 
-            // データベースのテーブルを取得
-            CardMasterTable cardMasterTable = db.GetCardMasterTable();
+		/// <summary>
+		/// 店舗テーブルから全件取得
+		/// </summary>
+		/// <returns></returns>
+		public List<ShopMasterData> SelectShopMaster()
+		{
+			// 以下は実際に使用する時の使い方の例
+			MyDatabase db = MyDatabase.Instance;
 
-            return cardMasterTable.SelectAll();
-        }
+			// データベースのテーブルを取得
+			ShopMasterTable shopMasterTable = db.GetShopMasterTable();
 
-        /// <summary>
-        /// 店舗テーブルから全件取得
-        /// </summary>
-        /// <returns></returns>
-        public List<ShopMasterData> SelectShopMaster()
-	    {
-		    // 以下は実際に使用する時の使い方の例
-		    MyDatabase db = MyDatabase.Instance;
+			return shopMasterTable.SelectAll();
+		}
 
-		    // データベースのテーブルを取得
-		    ShopMasterTable shopMasterTable = db.GetShopMasterTable();
+		/// <summary>
+		/// 店舗テーブルの登録／更新
+		/// </summary>
+		/// <param name="id">主キー</param>
+		/// <param name="name">店舗名</param>
+		/// <returns></returns>
+		public bool InsertUpdateShopMaster(int id, string name)
+		{
+			// 以下は実際に使用する時の使い方の例
+			MyDatabase db = MyDatabase.Instance;
 
-		    return shopMasterTable.SelectAll();
-	    }
+			// データベースのテーブルを取得
+			ShopMasterTable shopMasterTable = db.GetShopMasterTable();
 
-	    /// <summary>
-	    /// 店舗テーブルの登録／更新
-	    /// </summary>
-	    /// <param name="id">主キー</param>
-	    /// <param name="name">店舗名</param>
-	    /// <returns></returns>
-	    public bool InsertUpdateShopMaster(int id, string name)
-	    {
-		    // 以下は実際に使用する時の使い方の例
-		    MyDatabase db = MyDatabase.Instance;
+			ShopMasterData shopMasterData = shopMasterTable.SelectFromPrimaryKey(id);
 
-		    // データベースのテーブルを取得
-		    ShopMasterTable shopMasterTable = db.GetShopMasterTable();
+			// InsertまたはUpdate
+			// ※同一の主キーのデータがあればUpdate、無ければInsertとなる
+			shopMasterData.id = id;
+			shopMasterData.ShopName = name;
 
-		    ShopMasterData shopMasterData = shopMasterTable.SelectFromPrimaryKey(id);
+			shopMasterTable.Update(shopMasterData);
+			return true;
+		}
 
-		    // InsertまたはUpdate
-		    // ※同一の主キーのデータがあればUpdate、無ければInsertとなる
-		    shopMasterData.id = id;
-		    shopMasterData.ShopName = name;
+		/// <summary>
+		/// 収支テーブルから全件取得
+		/// </summary>
+		/// <returns></returns>
+		public List<InvestmentTransactionData> SelectInvestmentTransaction()
+		{
+			// 以下は実際に使用する時の使い方の例
+			MyDatabase db = MyDatabase.Instance;
 
-		    shopMasterTable.Update(shopMasterData);
-		    return true;
-	    }
+			// データベースのテーブルを取得
+			InvestmentTransactionTable investmentTransactionTable = db.GetInvestmentTransactionTable();
 
-	    /// <summary>
-	    /// 収支テーブルから全件取得
-	    /// </summary>
-	    /// <returns></returns>
-	    public List<InvestmentTransactionData> SelectInvestmentTransaction()
-	    {
-		    // 以下は実際に使用する時の使い方の例
-		    MyDatabase db = MyDatabase.Instance;
+			return investmentTransactionTable.SelectAll();
+		}
 
-		    // データベースのテーブルを取得
-		    InvestmentTransactionTable investmentTransactionTable = db.GetInvestmentTransactionTable();
+		/// <summary>
+		/// 収支テーブルの登録／更新
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		public bool InsertUpdateInvestmentTransaction(int shopId, int machineId, int machineNumber, int investment, int collection)
+		{
+			// 以下は実際に使用する時の使い方の例
+			MyDatabase db = MyDatabase.Instance;
 
-		    return investmentTransactionTable.SelectAll();
-	    }
+			// データベースのテーブルを取得
+			InvestmentTransactionTable investmentTransaction = db.GetInvestmentTransactionTable();
+			// トランザクションのためinsertしか行わない。更新はしない
+			InvestmentTransactionData investmentData = new InvestmentTransactionData();
 
-	    /// <summary>
-	    /// 収支テーブルの登録／更新
-	    /// </summary>
-	    /// <param name="id"></param>
-	    /// <param name="name"></param>
-	    /// <returns></returns>
-	    public bool InsertUpdateInvestmentTransaction(int shopId, int machineId, int machineNumber, int investment, int collection)
-	    {
-		    // 以下は実際に使用する時の使い方の例
-		    MyDatabase db = MyDatabase.Instance;
+			// InsertまたはUpdate
+			// ※同一の主キーのデータがあればUpdate、無ければInsertとなる
+			investmentData.shopid = shopId;
+			investmentData.machineid = machineId;
+			investmentData.machinenumber = machineNumber;
+			investmentData.investment = investment;
+			investmentData.collection = collection;
+			investmentTransaction.Update(investmentData);
+			return true;
+		}
 
-		    // データベースのテーブルを取得
-		    InvestmentTransactionTable investmentTransaction = db.GetInvestmentTransactionTable();
-		    // トランザクションのためinsertしか行わない。更新はしない
-		    InvestmentTransactionData investmentData = new InvestmentTransactionData();
+		/// <summary>
+		/// マシン詳細テーブルの登録／更新
+		/// </summary>
+		/// <param name="id"></param>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		public bool InsertMachineReferenceTransaction(int shopId, int machineId , int rank, int gameNum)
+		{
+			// 以下は実際に使用する時の使い方の例
+			MyDatabase db = MyDatabase.Instance;
 
-		    // InsertまたはUpdate
-		    // ※同一の主キーのデータがあればUpdate、無ければInsertとなる
-		    investmentData.shopid = shopId;
-		    investmentData.machineid = machineId;
-		    investmentData.machinenumber = machineNumber;
-		    investmentData.investment = investment;
-		    investmentData.collection = collection;
-		    investmentTransaction.Update(investmentData);
-		    return true;
-	    }
+			// データベースのテーブルを取得
+			MachineReferenceTransactionTable MachineReferenceTransaction = db.GetMachineReferenceTransactionTable();
+			// トランザクションのためinsertしか行わない。更新はしない
+			MachineReferenceTransactionData MachineReferenceData = new MachineReferenceTransactionData();
 
-	    /// <summary>
-	    /// マシン詳細テーブルの登録／更新
-	    /// </summary>
-	    /// <param name="id"></param>
-	    /// <param name="name"></param>
-	    /// <returns></returns>
-	    public bool InsertMachineReferenceTransaction(int shopId, int machineId , int rank, int gameNum)
-	    {
-		    // 以下は実際に使用する時の使い方の例
-		    MyDatabase db = MyDatabase.Instance;
-
-		    // データベースのテーブルを取得
-		    MachineReferenceTransactionTable MachineReferenceTransaction = db.GetMachineReferenceTransactionTable();
-		    // トランザクションのためinsertしか行わない。更新はしない
-		    MachineReferenceTransactionData MachineReferenceData = new MachineReferenceTransactionData();
-
-		    // InsertまたはUpdate
-		    // ※同一の主キーのデータがあればUpdate、無ければInsertとなる
-		    MachineReferenceData.id = shopId;
-		    MachineReferenceData.machineid = machineId;
-		    MachineReferenceData.rank = rank;
-		    MachineReferenceData.gamenum= gameNum;
-		    MachineReferenceTransaction.Update(MachineReferenceData);
-		    return true;
-	    }
-    }
+			// InsertまたはUpdate
+			// ※同一の主キーのデータがあればUpdate、無ければInsertとなる
+			MachineReferenceData.id = shopId;
+			MachineReferenceData.machineid = machineId;
+			MachineReferenceData.rank = rank;
+			MachineReferenceData.gamenum= gameNum;
+			MachineReferenceTransaction.Update(MachineReferenceData);
+			return true;
+		}
+	}
 }

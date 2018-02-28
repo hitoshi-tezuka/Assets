@@ -1,16 +1,24 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
+using Database;
 
 namespace BattleScene { 
 	public abstract class Card : MonoBehaviour {
 
-		[SerializeField] RawImage CardImage;
-		[SerializeField] Text CardDescription;
+		[SerializeField] private RawImage m_CardImage;
+		[SerializeField] private Text m_CardDescription;
+
 
 		private int m_purchaseMoney = 0;
-		public int PurchaseMoney { get { return m_purchaseMoney; } }
+		public int CostCoin { get { return m_Data.CostCoin; } }
+        public int TreaserCoin { get { return m_Data.Treasure; } }
+        public int PlusAction { get {return m_Data.PlusAction; } }
+        public int PlusCoin { get { return m_Data.PlusCoin; } }
+        public int PlusCard { get { return m_Data.PlusCard; } }
+        public int PlusPurchase { get { return m_Data.PlusPurchase; } }
+        public int PlusVictoryPointToken { get { return m_Data.PlusVictoryPointToken; } }
+
+        private CardMasterData m_Data;
 
 		/// <summary>
 		/// カード設定
@@ -18,10 +26,12 @@ namespace BattleScene {
 		/// <param name="image">画像イメージ</param>
 		/// <param name="description">説明文</param>
 		/// <param name="purchaseMoney">購入金額</param>
-		public void Setup(string description, int purchaseMoney, RawImage image = null)
+		public void Setup(CardMasterData data)
 		{
-			CardDescription.text = description;
-			m_purchaseMoney = purchaseMoney;
+            m_Data = data;
+
+            m_CardDescription.text = m_Data.CardName;
+			m_purchaseMoney = m_Data.CostCoin;
 		}
 
 		/// <summary>

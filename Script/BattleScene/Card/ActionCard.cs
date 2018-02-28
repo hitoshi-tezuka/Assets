@@ -14,5 +14,6 @@ namespace BattleScene{
 			// return effect;
 			throw new NotImplementedException();
 		}
+
 	}
 }
