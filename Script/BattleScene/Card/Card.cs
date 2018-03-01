@@ -20,6 +20,7 @@ namespace BattleScene {
         public int PlusVictoryPointToken { get { return m_Data.PlusVictoryPointToken; } }
 
         private CardMasterData m_Data;
+        private ScrollRect m_ScrollRect;
 
 		/// <summary>
 		/// カード設定
@@ -33,30 +34,41 @@ namespace BattleScene {
 
             m_CardDescription.text = m_Data.CardName;
 			m_purchaseMoney = m_Data.CostCoin;
-		}
+
+        }
 
 		/// <summary>
 		/// カード効果取得
 		/// </summary>
 		public abstract Effect GetEffect();
 
+
+        // 操作処理
         public void OnDrag(PointerEventData pointerEventData)
         {
-            var rect = this.transform.parent.parent.GetComponent<ScrollRect>();
-            rect.OnDrag(pointerEventData);
+            GetParentScrollRect().OnDrag(pointerEventData);
         }
 
         public void OnBeginDrag(PointerEventData pointerEventData)
         {
-            var rect = this.transform.parent.parent.GetComponent<ScrollRect>();
-            rect.OnBeginDrag(pointerEventData);
+            GetParentScrollRect().OnBeginDrag(pointerEventData);
         }
 
         public void OnEndDrag(PointerEventData pointerEventData)
         {
-            var rect = this.transform.parent.parent.GetComponent<ScrollRect>();
-            if (rect != null)
-                rect.OnEndDrag(pointerEventData);
+            
+            if (GetParentScrollRect() != null)
+                GetParentScrollRect().OnEndDrag(pointerEventData);
+        }
+
+
+        // 親階層のScrollRectを取得する
+        private ScrollRect GetParentScrollRect()
+        {
+            // 2階層上のScrollRectを取得
+            if(m_ScrollRect == null)
+                m_ScrollRect = this.transform.parent.parent.GetComponent<ScrollRect>();
+            return m_ScrollRect;
         }
     }
 } 

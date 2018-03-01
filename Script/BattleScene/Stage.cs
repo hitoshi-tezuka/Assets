@@ -25,6 +25,7 @@ namespace BattleScene {
         {
             card.transform.SetParent(m_Field);
             card.transform.localPosition = Vector3.zero;
+            card.transform.localScale = new Vector3(0.7f, 0.7f, 0.7f);
         }
 
 
