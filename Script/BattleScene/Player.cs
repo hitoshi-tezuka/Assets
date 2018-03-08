@@ -61,6 +61,7 @@ namespace BattleScene {
             {
                 m_PositionCard.Add(card);
                 card.transform.SetParent(m_Hand.content);
+                card.transform.localScale = Vector3.one;
                 UpdateStatus(card);
             }
         }

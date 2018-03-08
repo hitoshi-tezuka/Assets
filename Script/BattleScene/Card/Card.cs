@@ -8,6 +8,7 @@ namespace BattleScene {
 
 		[SerializeField] private RawImage m_CardImage;
 		[SerializeField] private Text m_CardDescription;
+        [SerializeField] private GameObject m_ShowCard;
 
 
 		private int m_purchaseMoney = 0;
@@ -19,8 +20,10 @@ namespace BattleScene {
         public int PlusPurchase { get { return m_Data.PlusPurchase; } }
         public int PlusVictoryPointToken { get { return m_Data.PlusVictoryPointToken; } }
 
+        private Vector3 m_dragIconScale = new Vector3(0.7f, 0.7f, 0.7f);
         private CardMasterData m_Data;
         private ScrollRect m_ScrollRect;
+        private GameObject m_DragIcon;
 
 		/// <summary>
 		/// カード設定
@@ -31,10 +34,8 @@ namespace BattleScene {
 		public void Setup(CardMasterData data)
 		{
             m_Data = data;
-
             m_CardDescription.text = m_Data.CardName;
 			m_purchaseMoney = m_Data.CostCoin;
-
         }
 
 		/// <summary>
@@ -42,33 +43,52 @@ namespace BattleScene {
 		/// </summary>
 		public abstract Effect GetEffect();
 
-
-        // 操作処理
+        // 各ドラッグ処理
+        public void OnBeginDrag(PointerEventData pointerEventData)
+        {
+            CreateDragIcon();
+            m_ShowCard.SetActive(false);
+            GetParentScrollRect().OnBeginDrag(pointerEventData);
+        }
         public void OnDrag(PointerEventData pointerEventData)
         {
             GetParentScrollRect().OnDrag(pointerEventData);
+            m_DragIcon.transform.position = pointerEventData.position;
         }
-
-        public void OnBeginDrag(PointerEventData pointerEventData)
-        {
-            GetParentScrollRect().OnBeginDrag(pointerEventData);
-        }
-
         public void OnEndDrag(PointerEventData pointerEventData)
         {
-            
+            // ドラッグ終了時、場に出していない場合は前の状態に戻す
             if (GetParentScrollRect() != null)
+            { 
                 GetParentScrollRect().OnEndDrag(pointerEventData);
+                CancelDrag();
+            }
+            Destroy(m_DragIcon);
         }
 
-
-        // 親階層のScrollRectを取得する
+        // 2階層上のScrollRectを取得する
         private ScrollRect GetParentScrollRect()
         {
-            // 2階層上のScrollRectを取得
             if(m_ScrollRect == null)
                 m_ScrollRect = this.transform.parent.parent.GetComponent<ScrollRect>();
             return m_ScrollRect;
+        }
+
+        private void CreateDragIcon()
+        {
+            m_DragIcon = Instantiate(this.gameObject,GetParentScrollRect().transform.parent.parent);
+
+            // アイコンでレイキャストがブロックされると正常にカード情報を取得できないため
+            CanvasGroup canvasGroup = m_DragIcon.AddComponent<CanvasGroup>();
+            canvasGroup.blocksRaycasts = false;
+
+            m_DragIcon.transform.localScale = m_dragIconScale;
+        }
+
+        private void CancelDrag()
+        {
+            this.transform.localScale = Vector3.one;
+            m_ShowCard.SetActive(true);
         }
     }
 } 
