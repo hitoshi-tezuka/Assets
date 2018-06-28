@@ -10,6 +10,8 @@ namespace BattleScene {
 		private GameObject m_PlayerPrefab;
 		[SerializeField]
 		private DataBaseController m_DatabaseController;
+        [SerializeField]
+        private Supply m_Supply;
 		
 		#region  データ定義
 		// 処理ターン
@@ -61,9 +63,11 @@ namespace BattleScene {
 					break;
 				case TurnType.SelectCard:
 					// どのカードでゲーム開始を行うか
-					foreach( var card in m_DatabaseController.SelectCardMaster())
+					foreach( var cardData in m_DatabaseController.SelectCardMaster())
 					{
-						Debug.Log( card.Card);
+                        var cardBuilder = new CardBuilder();
+                        var card = cardBuilder.CreateCard(cardData);
+                        m_Supply.AddSupply(card);
 					}
 					m_ProcessingTurn = TurnType.PlayerTurn;
 					break;

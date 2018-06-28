@@ -23,6 +23,7 @@ namespace BattleScene {
 		/// <param name="card"></param>
 		public void AddCard(Card card)
 		{
+            card.State=Card.CardState.HAND;
 			m_CardList.Add(card);
 		}
 

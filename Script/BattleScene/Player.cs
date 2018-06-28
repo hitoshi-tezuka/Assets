@@ -15,7 +15,7 @@ namespace BattleScene {
         private Deck m_Deck;
 
 		private BattleSceneManager.PlayerTurn m_ProcessingTurn;
-        private const int CLEANUPCARDNUM = 5;
+        private const int CLEANUPCARDNUM = 10;
         private PlayerStatus m_PlayerStatus;
         private List<Card> m_PositionCard;
 		/// <summary>

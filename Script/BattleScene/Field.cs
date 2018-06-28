@@ -6,10 +6,7 @@ using UnityEngine.EventSystems;
 
 namespace BattleScene { 
 
-    public class Stage : MonoBehaviour,IDropHandler {
-
-        [SerializeField]
-        private RectTransform m_Field;
+    public class Field : MonoBehaviour,IDropHandler {
 
 	    // Use this for initialization
 	    void Start () {
@@ -23,16 +20,17 @@ namespace BattleScene {
 
         public void AddCard(Card card)
         {
-            card.transform.SetParent(m_Field);
+            if (card.IsField || card.IsSupply) return;
+            card.transform.SetParent(this.transform);
             card.transform.localPosition = Vector3.zero;
-            card.transform.localScale = new Vector3(0.7f, 0.7f, 0.7f);
+            card.State = Card.CardState.FIELD;
         }
 
 
         public void OnDrop(PointerEventData pointerEventData)
         {
             Card dragCard = pointerEventData.pointerDrag.GetComponent<Card>();
-            AddCard(dragCard);
+            if(dragCard!=null) AddCard(dragCard);
         }
     }
 }

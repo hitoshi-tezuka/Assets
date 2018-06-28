@@ -4,7 +4,6 @@ using UnityEngine;
 
 namespace BattleScene
 {
-
     interface ICard
     {
 
