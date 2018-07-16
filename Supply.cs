@@ -12,7 +12,7 @@ namespace BattleScene
     
         public void AddSupply(Card card)
         {
-            card.State = Card.CardState.SUPPLY;
+            card.UpdateState(Card.CardState.SUPPLY);
             card.transform.SetParent(m_SupplyScroll.content);
         }
     }

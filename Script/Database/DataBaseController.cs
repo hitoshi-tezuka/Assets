@@ -9,13 +9,13 @@ namespace Database
 
 		// Use this for initialization
 		void Awake () {
-			// データベース初期化、ゲーム起動時などで1回だけ実行すればOK
-			MyDatabase.Init(this, this);
-		}
+            // データベース初期化、ゲーム起動時などで1回だけ実行すればOK
+            MyDatabase.Init(this,this);
+        }
 
-		public void OnDatabaseInit() {
-			// データベースの初期化の後に行いたい処理を実装する、例えばデータベース内の値を使った他の何かの初期化とか
-		}
+        public void OnDatabaseInit() {
+            // データベースの初期化の後に行いたい処理を実装する、例えばデータベース内の値を使った他の何かの初期化とか
+        }
 
 		private void Sample() {
 			// 以下は実際に使用する時の使い方の例

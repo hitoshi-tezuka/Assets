@@ -28,6 +28,7 @@ namespace Database
     /// <summary>
     /// DBデータ基底クラス
     /// </summary>
+    [Serializable]
     public abstract class AbstractData
     {
         public abstract void DebugPrint();

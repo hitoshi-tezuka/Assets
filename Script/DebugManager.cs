@@ -26,6 +26,14 @@ public class DebugManager : MonoBehaviour {
         {
             m_PhotonManager.SetActive(!m_PhotonManager.activeSelf);
         }
+        if (GUI.Button(new Rect(10, 310, 150, 100), "localposition reset"))
+        {
+            var players = m_BattleManager.GetComponent<BattleScene.BattleSceneManager>().m_PlayerList;
+            foreach(var player in players)
+            {
+                player.transform.localPosition = Vector3.zero;
+            }
+        }
 
     }
 

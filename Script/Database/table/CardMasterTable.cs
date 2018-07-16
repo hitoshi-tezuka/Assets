@@ -4,6 +4,7 @@ using System.Text;
 
 namespace Database
 { 
+    [Serializable]
     public class CardMasterData : AbstractData
     {
 

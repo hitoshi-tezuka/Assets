@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class PhotonManager : Photon.MonoBehaviour {
 
+    [SerializeField] BattleScene.BattleSceneManager m_BattleSceneManager;
     [SerializeField] Button m_RoomCreateEnter;
     [SerializeField] Text m_RoomState;
 
@@ -38,7 +39,13 @@ public class PhotonManager : Photon.MonoBehaviour {
 
     public void JoinRoom()
     {
-        PhotonNetwork.JoinRoom("user1");
+        var success = PhotonNetwork.JoinRoom("user1");
+        //if(success) BattleScene.BattleSceneManager.SceneManager.
+    }
+
+    public void GameStart()
+    {
+        m_BattleSceneManager.Initialize();
     }
 
     private void OnJoinRoom()
@@ -56,6 +63,7 @@ public class PhotonManager : Photon.MonoBehaviour {
     private void OnJoinedRoom()
     {
         Debug.Log("PhotonManager on Joined Room");
+        
     }
 
     private void OnReceivedRoomListUpdate()

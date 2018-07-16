@@ -247,8 +247,8 @@ public class PunTurnManager : PunBehaviour
 	/// <param name="propertiesThatChanged">Properties that changed.</param>
     public override void OnPhotonCustomRoomPropertiesChanged(Hashtable propertiesThatChanged)
     {
-
-     	//   Debug.Log("OnPhotonCustomRoomPropertiesChanged: "+propertiesThatChanged.ToStringFull());
+        // ターンが設定されるたびに呼び出される
+     	Debug.Log("OnPhotonCustomRoomPropertiesChanged: "+propertiesThatChanged.ToStringFull());
 
         if (propertiesThatChanged.ContainsKey("Turn"))
         {

@@ -1,11 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using Database;
 
 namespace BattleScene
 {
-    public class CardBuilder : MonoBehaviour {
+    public class CardBuilder  {
 
         private GameObject m_CoinCard;
         private GameObject m_PointCard;
@@ -23,29 +21,53 @@ namespace BattleScene
             m_ActionCard = Resources.Load(ACTIONCARDPATH) as GameObject;
         }
 
-        public Card CreateCard(CardMasterData data)
+        public Card CreateCardObject(CardMasterData data, bool isPhotonNetworkCreate)
         {
             GameObject card;
             switch(data.CardTypes)
             {
                 case CardMasterData.CardType.TREASURE:
-                    card = Instantiate(m_CoinCard);
+                    card = isPhotonNetworkCreate ? PhotonNetwork.Instantiate(COINCARDPATH, Vector3.zero,Quaternion.identity,0) : MonoBehaviour.Instantiate(m_CoinCard);
                     break;
                 case CardMasterData.CardType.VICTORYPOINT:
                 case CardMasterData.CardType.CURSE:
-                    card = Instantiate(m_PointCard);
+                    card = isPhotonNetworkCreate ? PhotonNetwork.Instantiate(POINTCARDPATH, Vector3.zero, Quaternion.identity, 0):MonoBehaviour.Instantiate(m_CoinCard);
                     break;
                 case CardMasterData.CardType.ACTION:
                 case CardMasterData.CardType.ATTACKACTION:
-                    card = Instantiate(m_ActionCard);
+                    card = isPhotonNetworkCreate ? PhotonNetwork.Instantiate(ACTIONCARDPATH, Vector3.zero, Quaternion.identity, 0) : MonoBehaviour.Instantiate(m_CoinCard);
                     break;
                 default:
-                    card = Instantiate(m_CoinCard);
+                    card = MonoBehaviour.Instantiate(m_CoinCard);
                     break;
             }
             var component = card.GetComponent<Card>();
             component.Setup(data);
             return component;
+        }
+
+        public Card CreateCardData(CardMasterData data)
+        {
+            Card card;
+            switch (data.CardTypes)
+            {
+                case CardMasterData.CardType.TREASURE:
+                    card = new CoinCard();
+                    break;
+                case CardMasterData.CardType.VICTORYPOINT:
+                case CardMasterData.CardType.CURSE:
+                    card = new PointCard();
+                    break;
+                case CardMasterData.CardType.ACTION:
+                case CardMasterData.CardType.ATTACKACTION:
+                    card = new ActionCard();
+                    break;
+                default:
+                    card = new CoinCard();
+                    break;
+            }
+            card.Setup(data);
+            return card;
         }
     }
 }

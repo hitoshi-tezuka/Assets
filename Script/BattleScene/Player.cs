@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Database;
+using System;
 
-namespace BattleScene { 
-	public class Player : MonoBehaviour {
+namespace BattleScene {
+    public class Player : Photon.MonoBehaviour {
 
 		[SerializeField]
 		private ScrollRect m_Hand;
@@ -15,9 +16,10 @@ namespace BattleScene {
         private Deck m_Deck;
 
 		private BattleSceneManager.PlayerTurn m_ProcessingTurn;
-        private const int CLEANUPCARDNUM = 10;
+        private const int CLEANUPCARDNUM = 5;
         private PlayerStatus m_PlayerStatus;
-        private List<Card> m_PositionCard;
+        private List<Card> m_HandCard;
+
 		/// <summary>
 		/// プレイヤーステータス情報
 		/// </summary>
@@ -45,34 +47,60 @@ namespace BattleScene {
 			}
 		}
 
-		public void Initialize(List<CardMasterData> cardList)
+        public void UpdateStatus()
+        {
+            photonView.RPC("SyncStatus", PhotonTargets.All);
+        }
+
+        [PunRPC]
+        public void SyncStatus()
+        {
+            Debug.Log("UpdateStatus");
+            foreach (Transform child in m_Hand.content)
+            {
+                var card = child.GetComponent<Card>();
+
+                m_PlayerStatus.Money += card.TreaserCoin;
+                m_PlayerStatus.Money += card.PlusCoin;
+                m_PlayerStatus.Purchase += card.PlusPurchase;
+                m_PlayerStatus.Action += card.PlusAction;
+                m_Status.UpdateStatus(m_PlayerStatus);
+            }
+        }
+
+        public void Initialize(List<CardMasterData> cardList)
 		{
             m_PlayerStatus = new PlayerStatus();
-            m_PositionCard = new List<Card>();
+            m_HandCard  = new List<Card>();
             m_Deck.Initialize(cardList);
+            m_Deck.Shuffle();
             DrawCard(CLEANUPCARDNUM);
+            UpdateStatus();
             m_Hand.horizontalNormalizedPosition = 0;
-            m_Status.UpdateStatus(m_PlayerStatus);
         }
 
         private void DrawCard(int addNum)
         {
-            foreach(var card in m_Deck.GetCard(addNum))
+            foreach (var card in m_Deck.GetCard(addNum))
             {
-                m_PositionCard.Add(card);
-                card.transform.SetParent(m_Hand.content);
-                card.transform.localScale = Vector3.one;
-                UpdateStatus(card);
+                 card.UpdateState(Card.CardState.HAND);
+                m_HandCard.Add(card);
             }
         }
 
-        public void UpdateStatus(Card card)
+        private void OnPhotonInstantiate(PhotonMessageInfo info)
         {
-            m_PlayerStatus.Money += card.TreaserCoin;
-            m_PlayerStatus.Money += card.PlusCoin;
-            m_PlayerStatus.Purchase += card.PlusPurchase;
-            m_PlayerStatus.Action += card.PlusAction;
-            m_Status.UpdateStatus(m_PlayerStatus);
+            Debug.Log("OnPhotonInstantiate : Player");
+            // プレイヤーの位置を初期化
+            SetupTransform();
         }
-	}
+
+        private void SetupTransform()
+        {
+            name = GetComponent<PhotonView>().ownerId.ToString();
+            transform.SetParent(BattleSceneManager.SceneManager.PlayersTransform);
+            transform.localPosition = Vector3.zero;
+            transform.localScale = Vector3.one;
+        }
+    }
 }

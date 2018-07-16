@@ -1,4 +1,6 @@
 ﻿using System.Collections;
+using System.Threading.Tasks;
+using System.Net;
 using UnityEngine;
 
 namespace Database
@@ -49,35 +51,68 @@ namespace Database
 	    /// データベース初期化
 	    /// </summary>
 	    /// <param name="mono">呼び出し元インスタンス</param>
-	    public static void Init(MonoBehaviour mono, MyDatabaseListener listener) {
+	    public static void Init(MonoBehaviour mono,MyDatabaseListener listener) {
 		    MyDatabase db = MyDatabase.Instance;
 		    db.mListener = listener;
-		    mono.StartCoroutine(GetNewDbVersion(DB_VERSION_FILE_NAME));
-	    }
+            GetNewDbVersion(DB_VERSION_FILE_NAME);
+            mono.StartCoroutine(GetNewDbVersion(DB_VERSION_FILE_NAME));
+            //var task = GetNewDbVersion(DB_VERSION_FILE_NAME);
+            // if (task.IsFaulted) Debug.Log("DB処理に例外が発生しました。");
+        }
 
+        /// <summary>
+        /// 最新のDBバージョンを取得する
+        /// </summary>
+        /// <param name="fileName">ファイル名</param>
+        /// <returns>DBバージョン</returns>
+        private static IEnumerator GetNewDbVersion(string fileName)
+        {
+            string ret;
+            string filePath = System.IO.Path.Combine(Application.streamingAssetsPath, fileName);
+            if (filePath.Contains("://"))
+            {
+                WWW www;
+                www = new WWW(filePath);    // httpclient.～Asyncから取得するように変更したいが、httpclientをUnityで使用するのは厳しそうなので保留。非同期できてない。
+                yield return www;
+                ret = www.text;
+            }
+            else
+            {
+                ret = System.IO.File.ReadAllText(filePath);
+            }
+            MyDatabase.Instance.OnGetNewDbVersion(int.Parse(ret));
+        }
+
+        /*
 	    /// <summary>
 	    /// 最新のDBバージョンを取得する
 	    /// </summary>
 	    /// <param name="fileName">ファイル名</param>
 	    /// <returns>DBバージョン</returns>
-	    private static IEnumerator GetNewDbVersion(string fileName) {
-		    string ret;
-		    string filePath = System.IO.Path.Combine(Application.streamingAssetsPath, fileName);
-		    if (filePath.Contains("://")) {
-			    WWW www = new WWW(filePath);
-			    yield return www;
-			    ret = www.text;
-		    } else {
-			    ret = System.IO.File.ReadAllText(filePath);
-		    }
-		    MyDatabase.Instance.OnGetNewDbVersion(int.Parse(ret));
-	    }
+	    private static async Task GetNewDbVersion(string fileName)
+        {
+            await Task.Run(() =>
+            {
+                string ret;
+		        string filePath = System.IO.Path.Combine(Application.streamingAssetsPath, fileName);
+		        if (filePath.Contains("://")) {
+                    WWW www ;
+                    www = new WWW(filePath);    // httpclient.～Asyncから取得するように変更したいが、httpclientをUnityで使用するのは厳しそうなので保留。非同期できてない。
+                    ret = www.text;
+                }
+                else {
+			        ret = System.IO.File.ReadAllText(filePath);
+                }
+                MyDatabase.Instance.OnGetNewDbVersion(int.Parse(ret));
+            }).ConfigureAwait(false);
+        }
+        */
 
-	    /// <summary>
-	    /// 最新のDBバージョン取得完了通知
-	    /// </summary>
-	    /// <param name="newDbVersion">最新のDBバージョン</param>
-	    private void OnGetNewDbVersion(int newDbVersion) {
+        /// <summary>
+        /// 最新のDBバージョン取得完了通知
+        /// </summary>
+        /// <param name="newDbVersion">最新のDBバージョン</param>
+        private void OnGetNewDbVersion(int newDbVersion) {
 		    Debug.Log("MyDatabase start");
 		    // DB更新フラグ
 		    bool isDbUpdate = false;

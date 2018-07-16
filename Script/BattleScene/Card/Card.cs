@@ -4,7 +4,7 @@ using Database;
 using UnityEngine.EventSystems;
 
 namespace BattleScene { 
-	public abstract class Card : MonoBehaviour,IDragHandler,IBeginDragHandler,IEndDragHandler{
+	public abstract class Card : Photon.MonoBehaviour,IDragHandler,IBeginDragHandler,IEndDragHandler{
 
 		[SerializeField] private RawImage m_CardImage;
 		[SerializeField] private Text m_CardDescription;
@@ -16,35 +16,39 @@ namespace BattleScene {
         {
             SUPPLY,
             FIELD,
-            HAND
+            HAND,
+            DECK,
+            DISCARD,
+            REVOCATION,
         }
 
-		
-        public int CostCoin { get { return m_Data.CostCoin; } }
-        public int TreaserCoin { get { return m_Data.Treasure; } }
-        public int PlusAction { get {return m_Data.PlusAction; } }
-        public int PlusCoin { get { return m_Data.PlusCoin; } }
-        public int PlusCard { get { return m_Data.PlusCard; } }
-        public int PlusPurchase { get { return m_Data.PlusPurchase; } }
-        public int PlusVictoryPointToken { get { return m_Data.PlusVictoryPointToken; } }
+        public int CostCoin { get { return Data.CostCoin; } }
+        public int TreaserCoin { get { return Data.Treasure; } }
+        public int PlusAction { get {return Data.PlusAction; } }
+        public int PlusCoin { get { return Data.PlusCoin; } }
+        public int PlusCard { get { return Data.PlusCard; } }
+        public int PlusPurchase { get { return Data.PlusPurchase; } }
+        public int PlusVictoryPointToken { get { return Data.PlusVictoryPointToken; } }
         public CardState State {
             get { return m_state; }
-            set {
-                this.m_state = value;
-                m_CardNum.SetActive(m_state.Equals(CardState.SUPPLY));
-                }
         }
 
         private Vector3 m_dragIconScale = new Vector3(0.7f, 0.7f, 0.7f);
-        private CardMasterData m_Data;
-        private ScrollRect m_ScrollRect;
+        public CardMasterData Data { get; private set; }
+        private ScrollRect m_HandScrollRect;
         private GameObject m_DragIcon;
         private int m_purchaseMoney = 0;
-        private CardState m_state = CardState.SUPPLY;
+
+        public  CardState m_state = CardState.SUPPLY;
         public bool IsHand {get { return State.Equals(CardState.HAND); }}
         public bool IsSupply { get { return State.Equals(CardState.SUPPLY); } }
         public bool IsField { get { return State.Equals(CardState.FIELD); } }
+        public bool IsDeck { get { return State.Equals(CardState.DECK); } }
+        public bool IsDiscard { get { return State.Equals(CardState.DISCARD); } }
+        public bool IsRevocation { get { return State.Equals(CardState.REVOCATION); } }
+
         private bool IsScroll { get { return IsHand || IsSupply; } }
+        private bool IsCreateDrag { get { return IsHand == IsField; } }
 
         /// <summary>
         /// カード設定
@@ -53,11 +57,15 @@ namespace BattleScene {
         /// <param name="description">説明文</param>
         /// <param name="purchaseMoney">購入金額</param>
         public void Setup(CardMasterData data)
-		{
-            m_Data = data;
-            m_CardDescription.text = m_Data.CardName;
-			m_purchaseMoney = m_Data.CostCoin;
-            m_CardCost.text = m_purchaseMoney.ToString();
+        {
+            //PhotonView photonView = GetComponent<PhotonView>();
+            //photonView.RPC("SyncSetup", PhotonTargets.AllBuffered, data);
+            photonView.RPC("SyncSetup", PhotonTargets.All, data);
+        }
+
+        public void UpdateState(CardState state)
+        {
+            photonView.RPC("SyncState", PhotonTargets.All, state);
         }
 
 		/// <summary>
@@ -70,24 +78,23 @@ namespace BattleScene {
         {
             if (IsScroll) GetParentScrollRect().OnBeginDrag(pointerEventData);
 
-            if (IsHand || IsField)
+            if (IsCreateDrag)
             {
                 CreateDragIcon();
                 m_ShowCard.SetActive(false);
             }
-
         }
         public void OnDrag(PointerEventData pointerEventData)
         {
             if (IsScroll) GetParentScrollRect().OnDrag(pointerEventData);
 
-            if (IsHand || IsField) m_DragIcon.transform.position = pointerEventData.position;
+            if (IsCreateDrag) m_DragIcon.transform.position = pointerEventData.position;
         }
         public void OnEndDrag(PointerEventData pointerEventData)
         {
             if (IsScroll) GetParentScrollRect().OnEndDrag(pointerEventData);
 
-            if (IsHand || IsSupply)
+            if (IsHand)
             {
                 CancelDrag();
             }
@@ -100,12 +107,34 @@ namespace BattleScene {
             Destroy(m_DragIcon);
         }
 
+        private void OnPhotonInstantiate(PhotonMessageInfo info)
+        {
+            Debug.Log("OnPhotonInstantiate : card");
+        }
+
+        public void SetupTransform()
+        {
+            var ownerId = photonView.ownerId;
+            switch(m_state)
+            {
+                case CardState.HAND:
+                    Debug.Log("HAND");
+                    transform.SetParent(BattleSceneManager.SceneManager.PlayersTransform.Find(ownerId.ToString()+"/Hand/Content"));
+                    break;
+                case CardState.DECK:
+                    Debug.Log("DECK");
+                    transform.SetParent(BattleSceneManager.SceneManager.PlayersTransform.Find(ownerId.ToString() + "/Deck"));
+                    break;
+            }
+            transform.localScale = Vector3.one;
+        }
+
         // 2階層上のScrollRectを取得する
         private ScrollRect GetParentScrollRect()
         {
-            if(m_ScrollRect == null)
-                m_ScrollRect = this.transform.parent.parent.GetComponent<ScrollRect>();
-            return m_ScrollRect;
+            if(m_HandScrollRect == null)
+                m_HandScrollRect = this.transform.parent.parent.GetComponent<ScrollRect>();
+            return m_HandScrollRect;
         }
 
         private void CreateDragIcon()
@@ -124,6 +153,27 @@ namespace BattleScene {
             this.transform.localScale = Vector3.one;
             m_ShowCard.SetActive(true);
         }
+
+        [PunRPC]
+        public void SyncSetup(CardMasterData data)
+        {
+            Debug.Log("-------------  SyncSetup -------------");
+            Data = data;
+            m_CardDescription.text = Data.CardName;
+            m_purchaseMoney = Data.CostCoin;
+            m_CardCost.text = m_purchaseMoney.ToString();
+        }
+
+        [PunRPC]
+        public void SyncState(CardState state)
+        {
+            Debug.Log("-------------  SyncState -------------");
+            Debug.Log("view id : " + photonView.viewID );
+            m_state = state;
+            m_CardNum.SetActive(m_state.Equals(CardState.SUPPLY));
+            SetupTransform();
+        }
+
 
     }
 } 

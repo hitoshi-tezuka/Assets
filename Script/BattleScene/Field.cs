@@ -23,7 +23,7 @@ namespace BattleScene {
             if (card.IsField || card.IsSupply) return;
             card.transform.SetParent(this.transform);
             card.transform.localPosition = Vector3.zero;
-            card.State = Card.CardState.FIELD;
+            card.UpdateState(Card.CardState.FIELD);
         }
 
 
