@@ -9,11 +9,11 @@ namespace BattleScene
 
         [SerializeField]
         private ScrollRect m_SupplyScroll;
-    
+
         public void AddSupply(Card card)
         {
             card.UpdateState(Card.CardState.SUPPLY);
-            card.transform.SetParent(m_SupplyScroll.content);
+            card.Supply = 10;
         }
     }
 }

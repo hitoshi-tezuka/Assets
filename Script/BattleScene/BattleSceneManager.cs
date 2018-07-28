@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Database;
+using UnityEngine.UI;
 
 namespace BattleScene { 
-	public class BattleSceneManager : MonoBehaviour{
+	public class BattleSceneManager : MonoBehaviour, ITurnManagerCallbacks{
 
 		[SerializeField]
 		private GameObject m_PlayerPrefab;
@@ -14,10 +15,16 @@ namespace BattleScene {
         private Supply m_Supply;
         [SerializeField]
         private Transform m_CardPhotonInsantiate;
+        [SerializeField]
+        private BattleTurnManager m_TurnManager;
+        [SerializeField]
+        private GameObject m_PlayerTurnView;
+        [SerializeField]
+        private Text m_PlayerText;
 
-		#region  データ定義
-		// 処理ターン
-		public enum TurnType
+        #region  データ定義
+        // 処理ターン
+        public enum TurnType
 		{
             SetupPlayer = 0,
 			OrderPlayer,	    // プレイヤー順序の決定
@@ -38,10 +45,8 @@ namespace BattleScene {
 
 		#region 変数定義
 		public TurnType m_ProcessingTurn;               // 現在のターン
-
-        
-        private int m_PlayerNum = 0;
         public List<Player> m_PlayerList = new List<Player>();
+        public Player NowPlayer { get; private set;}
         #endregion
 
         #region get/set
@@ -53,12 +58,10 @@ namespace BattleScene {
 
         public Transform PlayersTransform
         { get { return this.transform.Find("StageCanvas/Players"); } }
-
-        public Transform CardPhotonInstantiate
-        {
-            get { return this.transform.Find("StageCanvas/CardPhotonInsantiate"); }
-        }
-
+        public Transform FieldTransform
+        { get { return this.transform.Find("StageCanvas/Stage/Field"); } }
+        public Transform SupplyTransform
+        { get { return this.transform.Find("StageCanvas/Stage/Supply/Scroll View/Content"); } }
         #endregion
 
         private void Awake()
@@ -69,7 +72,10 @@ namespace BattleScene {
         // Use this for initialization
         void Start () {
             // シリアライザ登録
-            CardMasterDataSerializer.Register();
+            DataSerializer<CardMasterData>.Register('W');
+            DataSerializer<Player.PlayerStatus>.Register('Q');
+            m_TurnManager = GetComponent<BattleTurnManager>();
+            m_TurnManager.TurnManagerListener = this;
             m_ProcessingTurn = TurnType.SetupPlayer;
         }
 
@@ -84,41 +90,38 @@ namespace BattleScene {
 					m_ProcessingTurn = TurnType.SelectCard;
 					break;
 				case TurnType.SelectCard:
-					// どのカードでゲーム開始を行うか
-					foreach( var cardData in m_DatabaseController.SelectCardMaster())
-					{
-                        var cardBuilder = new CardBuilder();
-                        var card = cardBuilder.CreateCardObject(cardData,false);
-                        m_Supply.AddSupply(card);
-					}
-					m_ProcessingTurn = TurnType.PlayerTurn;
-					break;
+                    if(PhotonNetwork.isMasterClient)
+                    { 
+					    // どのカードでゲーム開始を行うか
+					    foreach( var cardData in m_DatabaseController.SelectCardMaster())
+					    {
+                            var cardBuilder = new CardBuilder();
+                            var card = cardBuilder.CreateCardObject(cardData,true);
+                            m_Supply.AddSupply(card);
+					    }
+                        m_ProcessingTurn = TurnType.PlayerTurn;
+                    }
+                    break;
 				case TurnType.PlayerTurn:
 					// プレイヤーがターン終了するまで他のプレイヤーは待機
-					Player nowPlayer = m_PlayerList[0];
-
 					break;
+
 			}
 		}
 
-		public void Initialize()
+        public void Initialize()
         {
-            m_ProcessingTurn = TurnType.SetupPlayer;
+            m_ProcessingTurn = TurnType.OrderPlayer;
             // デッキ初期化
             List<CardMasterData> cardlist = InitializeDeck();
 
 			// プレイヤー作成
 			List<Player> list = new List<Player>();
 		
-            m_PlayerNum++;
-
             var playerPrefab = PhotonNetwork.Instantiate(m_PlayerPrefab.name,Vector3.zero,Quaternion.identity, 0);
-            var view = playerPrefab.GetComponent<PhotonView>();
-
             Player player = playerPrefab.GetComponent<Player>();
             player.Initialize(cardlist);
-		    m_PlayerList.Add(player);
-		}
+        }
 
 		private List<CardMasterData> InitializeDeck()
 		{
@@ -134,7 +137,53 @@ namespace BattleScene {
 				cardlist.Add(cardCopper);
 			}
 			return cardlist;
-
 		}
-	}
+
+        public void PlayerAdd(Player player)
+        {
+            m_PlayerList.Add(player);
+        }
+
+        public void GameStart()
+        {
+            if (PhotonNetwork.isMasterClient)
+                StartTurn();
+        }
+
+        private void StartTurn()
+        {
+                m_TurnManager.BeginTurn();
+        }
+
+        public void OnTurnBegins()
+        {
+            Debug.Log("OnTurnBegins");
+            var player = m_TurnManager.PlayerTurn;
+            m_PlayerText.text = player.ID.ToString();
+            m_PlayerList.ForEach(x =>
+            {
+                if (x.OwnerPlayer.Equals(player))
+                {
+                    x.gameObject.SetActive(true);
+                    NowPlayer = x;
+                }
+                else
+                { 
+                    x.gameObject.SetActive(false);
+                }
+            });
+
+        }
+
+        public void OnTurnCompleted()
+        {
+            NowPlayer.EndTurn();
+            StartTurn();
+        }
+
+        public void OnTurnTimeEnds()
+        {
+            OnTurnCompleted();
+        }
+    }
 }

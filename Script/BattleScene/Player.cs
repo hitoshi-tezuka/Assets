@@ -20,9 +20,13 @@ namespace BattleScene {
         private PlayerStatus m_PlayerStatus;
         private List<Card> m_HandCard;
 
+        public Action<Player> PhotonInstantiateCallback { get; set; }
+        public PhotonPlayer OwnerPlayer { get; private set; }
+
 		/// <summary>
 		/// プレイヤーステータス情報
 		/// </summary>
+        [Serializable]
 		public struct PlayerStatus
 		{
 			public int Money;
@@ -47,60 +51,103 @@ namespace BattleScene {
 			}
 		}
 
-        public void UpdateStatus()
-        {
-            photonView.RPC("SyncStatus", PhotonTargets.All);
-        }
-
-        [PunRPC]
-        public void SyncStatus()
-        {
-            Debug.Log("UpdateStatus");
-            foreach (Transform child in m_Hand.content)
-            {
-                var card = child.GetComponent<Card>();
-
-                m_PlayerStatus.Money += card.TreaserCoin;
-                m_PlayerStatus.Money += card.PlusCoin;
-                m_PlayerStatus.Purchase += card.PlusPurchase;
-                m_PlayerStatus.Action += card.PlusAction;
-                m_Status.UpdateStatus(m_PlayerStatus);
-            }
-        }
-
         public void Initialize(List<CardMasterData> cardList)
-		{
+        {
             m_PlayerStatus = new PlayerStatus();
-            m_HandCard  = new List<Card>();
+            m_HandCard = new List<Card>();
             m_Deck.Initialize(cardList);
             m_Deck.Shuffle();
             DrawCard(CLEANUPCARDNUM);
-            UpdateStatus();
-            m_Hand.horizontalNormalizedPosition = 0;
+            CleanUpStatus();
+        }
+
+        public void UpdateStatus(Card card)
+        {
+            m_PlayerStatus.Money += card.TreaserCoin;
+            m_PlayerStatus.Money += card.PlusCoin;
+            m_PlayerStatus.Purchase += card.PlusPurchase;
+            m_PlayerStatus.Action += card.PlusAction;
+            photonView.RPC("SyncStatus", PhotonTargets.AllBuffered, m_PlayerStatus);
+        }
+
+        private void SyncStatus()
+        {
+            photonView.RPC("SyncStatus", PhotonTargets.AllBuffered, m_PlayerStatus);
+        }
+
+        [PunRPC]
+        private void SyncStatus(PlayerStatus status)
+        {
+            m_Status.UpdateStatus(status);
+        }
+
+        public void PurchaseCard(Card card)
+        {
+            if (card.CostCoin>m_PlayerStatus.Money || m_PlayerStatus.Purchase <= 0) return;
+            var cardCont = m_Deck.AddCard(card.Data);
+            cardCont.UpdateState(Card.CardState.DISCARD);
+            m_PlayerStatus.Purchase -= 1;
+            m_PlayerStatus.Money -= card.CostCoin;
+            card.Supply = card.Supply - 1;
+            photonView.RPC("SyncPurchaseCard", PhotonTargets.AllBuffered,m_PlayerStatus);
+        }
+
+        [PunRPC]
+        private void SyncPurchaseCard(PlayerStatus status)
+        {
+            m_Status.UpdateStatus(status);
+        }
+
+        public void EndTurn()
+        {
+            CleanUpStatus();
+            HandAllDiscard();
+            DrawCard(CLEANUPCARDNUM);
         }
 
         private void DrawCard(int addNum)
         {
             foreach (var card in m_Deck.GetCard(addNum))
             {
-                 card.UpdateState(Card.CardState.HAND);
+                card.UpdateState(Card.CardState.HAND);
                 m_HandCard.Add(card);
             }
         }
 
         private void OnPhotonInstantiate(PhotonMessageInfo info)
         {
-            Debug.Log("OnPhotonInstantiate : Player");
-            // プレイヤーの位置を初期化
+            //Debug.Log("OnPhotonInstantiate : Player");
+            OwnerPlayer = info.sender;
+            name = OwnerPlayer.ID.ToString();
             SetupTransform();
+            BattleSceneManager.SceneManager.PlayerAdd(this);
         }
 
+        // プレイヤーの位置を初期化
         private void SetupTransform()
         {
-            name = GetComponent<PhotonView>().ownerId.ToString();
             transform.SetParent(BattleSceneManager.SceneManager.PlayersTransform);
             transform.localPosition = Vector3.zero;
             transform.localScale = Vector3.one;
+        }
+
+
+        private void CleanUpStatus()
+        {
+            m_PlayerStatus = new PlayerStatus();
+            m_PlayerStatus.Purchase = 1;
+            m_PlayerStatus.Action = 1;
+            SyncStatus();
+        }
+
+        private void HandAllDiscard()
+        {
+            foreach (var card in m_HandCard)
+            {
+                card.UpdateState(Card.CardState.DISCARD);
+            }
+
+            m_HandCard.Clear();
         }
     }
 }

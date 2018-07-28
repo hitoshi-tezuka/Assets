@@ -17,47 +17,75 @@ namespace BattleScene {
         private List<Card> m_CardList = new List<Card>();
 		private CardBuilder m_CardBulider;
 
-		/// <summary>
-		/// カード追加処理
-		/// </summary>
-		/// <param name="card"></param>
-		public void AddCard(Card card)
+        private void Start()
+        {
+            m_CardBulider = new CardBuilder();
+        }
+
+        /// <summary>
+        /// カード追加処理
+        /// </summary>
+        /// <param name="card"></param>
+        public Card AddCard(Card card)
 		{
-            card.UpdateState(Card.CardState.DECK);
 			m_CardList.Add(card);
+            return card;
             
 		}
 
-		/// <summary>
-		/// カード取得処理
-		/// </summary>
-		/// <returns></returns>
-		public Card[] GetCard(int num)
-		{
-			List<Card> cards = new List<Card>();
+        /// <summary>
+        /// カード追加処理(カード作成して追加）
+        /// </summary>
+        /// <param name="card"></param>
+        public Card AddCard(CardMasterData cardMasterData)
+        {
+            var card = m_CardBulider.CreateCardObject(cardMasterData, true);
+            return AddCard(card);
+
+        }
+
+        /// <summary>
+        /// カード取得処理
+        /// </summary>
+        /// <returns></returns>
+        public Card[] GetCard(int num, List<Card> alreadyCards = null)
+        {
+            List<Card> cards = new List<Card>();
             int i = 0;
-            while (i<num)
+            var deckCardList = m_CardList.FindAll(x => x.IsDeck && !(alreadyCards != null && alreadyCards.Contains(x)));
+            if (deckCardList.Count < num) 
             {
-                cards.Add(m_CardList[i]);
-                i++;
+                cards.AddRange(deckCardList);
+                var n = num - deckCardList.Count;
+                CleanUp();
+                cards.AddRange(GetCard(n, deckCardList));
             }
+            else
+            { 
+                while (i<num)
+                {
+                    cards.Add(deckCardList[i]);
+                    i++;
+                }
+            }
+
             return cards.ToArray();
 		}
    
 		/// <summary>
 		/// 初期化
 		/// </summary>
-		public void Initialize(List<CardMasterData> cardList) 
-		{
-			m_CardBulider = new CardBuilder();
-
-			foreach (var card in cardList)
+		public void Initialize(List<CardMasterData> cardList)
+        {
+            m_CardBulider = new CardBuilder();
+            foreach (var card in cardList)
 			{
 				var content = m_CardBulider.CreateCardObject(card,true);
                 content.transform.SetParent(this.transform);
                 content.transform.localScale = Vector3.one;
 				AddCard(content);
-			}
+                content.UpdateState(Card.CardState.DECK);
+            }
 		}
 
         public void Shuffle()
@@ -72,6 +100,18 @@ namespace BattleScene {
                 m_CardList[k] = m_CardList[i];
                 m_CardList[i] = card;
             }
+        }
+
+        private void  CleanUp()
+        {
+            foreach(var card in m_CardList)
+            {
+                if(card.IsDiscard)
+                {
+                    card.UpdateState(Card.CardState.DECK);
+                }
+            }
+            Shuffle();
         }
 	}
 }

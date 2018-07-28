@@ -21,9 +21,8 @@ namespace BattleScene {
         public void AddCard(Card card)
         {
             if (card.IsField || card.IsSupply) return;
-            card.transform.SetParent(this.transform);
-            card.transform.localPosition = Vector3.zero;
             card.UpdateState(Card.CardState.FIELD);
+            BattleSceneManager.SceneManager.NowPlayer.UpdateStatus(card);
         }
 
 

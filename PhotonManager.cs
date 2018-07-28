@@ -45,7 +45,8 @@ public class PhotonManager : Photon.MonoBehaviour {
 
     public void GameStart()
     {
-        m_BattleSceneManager.Initialize();
+        this.gameObject.SetActive(false);
+        m_BattleSceneManager.GameStart();
     }
 
     private void OnJoinRoom()
@@ -63,7 +64,8 @@ public class PhotonManager : Photon.MonoBehaviour {
     private void OnJoinedRoom()
     {
         Debug.Log("PhotonManager on Joined Room");
-        
+        m_BattleSceneManager.Initialize();
+
     }
 
     private void OnReceivedRoomListUpdate()
