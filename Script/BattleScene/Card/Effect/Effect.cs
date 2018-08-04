@@ -4,6 +4,8 @@ using UnityEngine;
 
 namespace BattleScene {
 	public abstract class Effect  {
-		public abstract Effect GetEffectValue();
+        protected string m_CardId;
+        public Effect(string cardId) { m_CardId = cardId; }
+		public abstract void ActivateEffect(Player player);
 	}
 }

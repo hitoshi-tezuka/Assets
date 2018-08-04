@@ -14,6 +14,7 @@ namespace BattleScene {
 		private Status m_Status;
         [SerializeField]
         private Deck m_Deck;
+        [SerializeField] private ScrollRect m_PublicDrawCard;
 
 		private BattleSceneManager.PlayerTurn m_ProcessingTurn;
         private const int CLEANUPCARDNUM = 5;
@@ -51,7 +52,7 @@ namespace BattleScene {
 			}
 		}
 
-        public void Initialize(List<CardMasterData> cardList)
+        public void Initialize(List<Entity_CardMaster.CardMasterData> cardList)
         {
             m_PlayerStatus = new PlayerStatus();
             m_HandCard = new List<Card>();
@@ -67,7 +68,7 @@ namespace BattleScene {
             m_PlayerStatus.Money += card.PlusCoin;
             m_PlayerStatus.Purchase += card.PlusPurchase;
             m_PlayerStatus.Action += card.PlusAction;
-            photonView.RPC("SyncStatus", PhotonTargets.AllBuffered, m_PlayerStatus);
+            SyncStatus();
         }
 
         private void SyncStatus()
@@ -105,13 +106,16 @@ namespace BattleScene {
             DrawCard(CLEANUPCARDNUM);
         }
 
-        private void DrawCard(int addNum)
+        public List<Card> DrawCard(int addNum)
         {
+            var cardList = new List<Card>();
             foreach (var card in m_Deck.GetCard(addNum))
             {
                 card.UpdateState(Card.CardState.HAND);
                 m_HandCard.Add(card);
+                cardList.Add(card);
             }
+            return cardList;
         }
 
         private void OnPhotonInstantiate(PhotonMessageInfo info)

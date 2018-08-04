@@ -37,7 +37,7 @@ namespace BattleScene {
         /// カード追加処理(カード作成して追加）
         /// </summary>
         /// <param name="card"></param>
-        public Card AddCard(CardMasterData cardMasterData)
+        public Card AddCard(Entity_CardMaster.CardMasterData cardMasterData)
         {
             var card = m_CardBulider.CreateCardObject(cardMasterData, true);
             return AddCard(card);
@@ -68,14 +68,13 @@ namespace BattleScene {
                     i++;
                 }
             }
-
             return cards.ToArray();
 		}
    
 		/// <summary>
 		/// 初期化
 		/// </summary>
-		public void Initialize(List<CardMasterData> cardList)
+		public void Initialize(List<Entity_CardMaster.CardMasterData> cardList)
         {
             m_CardBulider = new CardBuilder();
             foreach (var card in cardList)

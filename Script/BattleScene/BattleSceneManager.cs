@@ -47,6 +47,7 @@ namespace BattleScene {
 		public TurnType m_ProcessingTurn;               // 現在のターン
         public List<Player> m_PlayerList = new List<Player>();
         public Player NowPlayer { get; private set;}
+        private List<Entity_CardMaster.CardMasterData> m_card = new List<Entity_CardMaster.CardMasterData>();
         #endregion
 
         #region get/set
@@ -68,12 +69,15 @@ namespace BattleScene {
         {
             SceneManager = this;
         }
-
+    
         // Use this for initialization
         void Start () {
+            Entity_CardMaster card = Resources.Load<Entity_CardMaster>("CardData");
+            card.Card.ForEach(x => { m_card.Add(x); Debug.Log(x.Card); });
+
             // シリアライザ登録
-            DataSerializer<CardMasterData>.Register('W');
-            DataSerializer<Player.PlayerStatus>.Register('Q');
+            DataSerializer<Entity_CardMaster.CardMasterData>.Register('C');
+            DataSerializer<Player.PlayerStatus>.Register('S');
             m_TurnManager = GetComponent<BattleTurnManager>();
             m_TurnManager.TurnManagerListener = this;
             m_ProcessingTurn = TurnType.SetupPlayer;
@@ -93,7 +97,7 @@ namespace BattleScene {
                     if(PhotonNetwork.isMasterClient)
                     { 
 					    // どのカードでゲーム開始を行うか
-					    foreach( var cardData in m_DatabaseController.SelectCardMaster())
+					    foreach( var cardData in m_card)
 					    {
                             var cardBuilder = new CardBuilder();
                             var card = cardBuilder.CreateCardObject(cardData,true);
@@ -113,7 +117,7 @@ namespace BattleScene {
         {
             m_ProcessingTurn = TurnType.OrderPlayer;
             // デッキ初期化
-            List<CardMasterData> cardlist = InitializeDeck();
+            List<Entity_CardMaster.CardMasterData> cardlist = InitializeDeck();
 
 			// プレイヤー作成
 			List<Player> list = new List<Player>();
@@ -123,12 +127,12 @@ namespace BattleScene {
             player.Initialize(cardlist);
         }
 
-		private List<CardMasterData> InitializeDeck()
+		private List<Entity_CardMaster.CardMasterData> InitializeDeck()
 		{
-			var cardlist =new List<CardMasterData>();
-			var cardEstate = m_DatabaseController.SelectCardMaster("Estate");
-			var cardCopper = m_DatabaseController.SelectCardMaster("Copper");
-			for (int i = 0; i < 3; i++)
+			var cardlist =new List<Entity_CardMaster.CardMasterData>();
+            var cardEstate = m_card.Find(x => x.Card.Equals("Estate"));
+			var cardCopper = m_card.Find(x => x.Card.Equals("Copper"));
+            for (int i = 0; i < 3; i++)
 			{
 				cardlist.Add(cardEstate);
 			}

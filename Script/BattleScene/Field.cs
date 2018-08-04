@@ -8,23 +8,19 @@ namespace BattleScene {
 
     public class Field : MonoBehaviour,IDropHandler {
 
-	    // Use this for initialization
-	    void Start () {
-		
-	    }
-	
-	    // Update is called once per frame
-	    void Update () {
-		
-	    }
-
         public void AddCard(Card card)
         {
             if (card.IsField || card.IsSupply) return;
             card.UpdateState(Card.CardState.FIELD);
             BattleSceneManager.SceneManager.NowPlayer.UpdateStatus(card);
-        }
 
+            if (card.IsAction)
+            {
+                var actionEffect = new ActionEffect(card.CardId);
+                actionEffect.ActivateEffect(BattleSceneManager.SceneManager.NowPlayer);
+            }
+
+        }
 
         public void OnDrop(PointerEventData pointerEventData)
         {

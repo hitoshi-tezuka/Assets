@@ -15,6 +15,7 @@ namespace Database
             CURSE = 30,
             ACTION = 40,
             ATTACKACTION = 41,
+            REACTION = 42
         }
 
         public string Card = string.Empty;
@@ -33,6 +34,7 @@ namespace Database
         public int PlusPurchase = 0;
         public int PlusCoin = 0;
         public int PlusVictoryPointToken = 0;
+        public string CardDescription = string.Empty;
 
         public override void DebugPrint()
         {
@@ -58,6 +60,7 @@ namespace Database
         private const string COL_PLUSPURCHASE = "PlusPurchase";                     // ＋購入
         private const string COL_PLUSCOIN = "PlusCoin";                             // ＋コイン
         private const string COL_PLUSVICTORYPOINTTOKEN = "PlusVictoryPointToken";   // ＋勝利点トークン
+        private const string COL_DESCRIPTION = "CardDescription";                   // カード説明
 
         protected override string[] PrimaryKeyName { get { string[] str = { "Card" }; return str; } }
 
@@ -86,7 +89,6 @@ namespace Database
             card.CostPotion = GetIntValue(row, COL_COSTPOTISION);
             card.CostLiabilities = GetIntValue(row, COL_COSTLIABILITIES);
             card.Classification = GetIntValue(row, COL_CLASSIFICATION);
-            card.CardTypes = (CardMasterData.CardType)GetIntValue(row, COL_CARDTYPE);
             card.Treasure = GetIntValue(row, COL_TREASURE);
             card.VictoryPoint = GetIntValue(row, COL_VICTORYPOINT);
             card.PlusCard = GetIntValue(row, COL_PLUSCARD);
@@ -94,9 +96,9 @@ namespace Database
             card.PlusPurchase = GetIntValue(row, COL_PLUSPURCHASE);
             card.PlusCoin = GetIntValue(row, COL_PLUSCOIN);
             card.PlusVictoryPointToken = GetIntValue(row, COL_PLUSVICTORYPOINTTOKEN);
+            card.CardDescription = GetStringValue(row, COL_DESCRIPTION);
             return card;
         }
-
     }
 
 }

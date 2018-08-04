@@ -199,42 +199,17 @@ namespace Database
 
 	    // ここから下がどんどん増えていく
 	
-	    private DummyMasterTable mDummyMasterTable;
-	    private DummyCaptureTable mDummyCaptureTable;
-	    private ShopMasterTable m_ShopMasterTable;
 	    private InvestmentTransactionTable m_InvestmentTransactionTable;
 	    private MachineReferenceTransactionTable m_MachineReferenceTransactionTable;
 
         private CardMasterTable m_CardMasterTable;
 
 	    private void CreateDbTables() {
-		    mDummyMasterTable = new DummyMasterTable(ref mDb);
-		    mDummyCaptureTable = new DummyCaptureTable(ref mDb);
-		    m_ShopMasterTable = new ShopMasterTable(ref mDb);
-		    m_InvestmentTransactionTable = new InvestmentTransactionTable(ref mDb);
             m_CardMasterTable = new CardMasterTable(ref mDb);
-
-
 	    }
 
 	    private void MargeData(ref SqliteDatabase oldDb) {
-		    mDummyMasterTable.MargeData(ref oldDb);
-		    mDummyCaptureTable.MargeData(ref oldDb);
 	    }
-
-	    public DummyMasterTable GetDummyMasterTable() {
-		    return mDummyMasterTable;
-	    }
-
-	    public DummyCaptureTable GetDummyCaptureTable() {
-		    return mDummyCaptureTable;
-	    }
-
-	    public ShopMasterTable GetShopMasterTable()
-	    {
-		    return m_ShopMasterTable;
-	    }
-
 
         public CardMasterTable GetCardMasterTable()
         {

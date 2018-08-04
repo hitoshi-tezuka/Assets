@@ -22,9 +22,20 @@ namespace BattleScene {
             DECK,
             DISCARD,
             REVOCATION,
+            PUBLICDRAWCARD,
         }
 
-        public CardMasterData Data { get; private set; }
+        public enum CardType
+        {
+            TREASURE = 10,
+            VICTORYPOINT = 20,
+            CURSE = 30,
+            ACTION = 40,
+            ATTACKACTION = 41,
+            REACTION = 42
+        }
+
+        public Entity_CardMaster.CardMasterData Data { get; private set; }
         public string CardId { get { return Data.Card; } }
         public int CostCoin { get { return Data.CostCoin; } }
         public int TreaserCoin { get { return Data.Treasure; } }
@@ -34,12 +45,14 @@ namespace BattleScene {
         public int PlusPurchase { get { return Data.PlusPurchase; } }
         public int PlusVictoryPointToken { get { return Data.PlusVictoryPointToken; } }
         public CardState State { get; private set; } = CardState.SUPPLY;
-        public bool IsHand {get { return State.Equals(CardState.HAND); }}
+        public CardType Type { get { return Data.CardType; } }
+        public bool IsHand {get { return State.Equals(CardState.HAND); } }
         public bool IsSupply { get { return State.Equals(CardState.SUPPLY); } }
         public bool IsField { get { return State.Equals(CardState.FIELD); } }
         public bool IsDeck { get { return State.Equals(CardState.DECK); } }
         public bool IsDiscard { get { return State.Equals(CardState.DISCARD); } }
         public bool IsRevocation { get { return State.Equals(CardState.REVOCATION); } }
+        public bool IsAction { get { return (Data.CardType == CardType.ACTION || Data.CardType == CardType.ATTACKACTION || Data.CardType == CardType.REACTION); } }
         private bool IsScroll { get { return IsHand || IsSupply || IsField; } }
         public int Supply { get { return m_Supply; } set { UpdateSupply(value); } }
 
@@ -54,12 +67,17 @@ namespace BattleScene {
         private bool IsCreateDrag { get { return /* IsHand || IsField;*/ false; } }
 
         /// <summary>
+        /// カード効果取得
+        /// </summary>
+        public abstract Effect GetEffect(Player player);
+
+        /// <summary>
         /// カード設定
         /// </summary>
         /// <param name="image">画像イメージ</param>
         /// <param name="description">説明文</param>
         /// <param name="purchaseMoney">購入金額</param>
-        public void Setup(CardMasterData data)
+        public void Setup(Entity_CardMaster.CardMasterData data)
         {
             Debug.Log("-------------  SyncSetup -------------");
             photonView.RPC("SyncSetup", PhotonTargets.AllBuffered, data);
@@ -85,11 +103,6 @@ namespace BattleScene {
             if (!IsSupply) return;
             photonView.RPC("SyncSupply", PhotonTargets.AllBuffered, num);
         }
-
-        /// <summary>
-        /// カード効果取得
-        /// </summary>
-        public abstract Effect GetEffect();
 
         // 各ドラッグ処理
         public void OnBeginDrag(PointerEventData pointerEventData)
@@ -132,7 +145,7 @@ namespace BattleScene {
             //Debug.Log("OnPhotonInstantiate : card");
         }
 
-        public void SetupTransform()
+        private void SetupTransform()
         {
             var ownerId = photonView.owner.ID;
             switch(State)
@@ -159,6 +172,11 @@ namespace BattleScene {
                     break;
                 case CardState.DISCARD:
                     transform.SetParent(BattleSceneManager.SceneManager.PlayersTransform.Find(ownerId.ToString() + "/DisCard"));
+                    transform.localPosition = Vector3.zero;
+                    transform.localScale = Vector3.one;
+                    break;
+                case CardState.PUBLICDRAWCARD:
+                    transform.SetParent(BattleSceneManager.SceneManager.PlayersTransform.Find(ownerId.ToString() + "/PublicDrawCard/Content"));
                     transform.localPosition = Vector3.zero;
                     transform.localScale = Vector3.one;
                     break;
@@ -191,7 +209,7 @@ namespace BattleScene {
         }
 
         [PunRPC]
-        public void SyncSetup(CardMasterData data)
+        public void SyncSetup(Entity_CardMaster.CardMasterData data)
         {
             Data = data;
             m_CardDescription.text = Data.CardName;
