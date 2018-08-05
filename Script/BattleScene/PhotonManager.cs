@@ -12,6 +12,7 @@ public class PhotonManager : Photon.MonoBehaviour {
     public void ConnectPhoton()
     {
         PhotonNetwork.ConnectUsingSettings("v1.0");
+        Debug.Log("ConnectPhoton");
     }
 
     public void CreateRoom()

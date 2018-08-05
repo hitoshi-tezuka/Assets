@@ -3,7 +3,6 @@ using UnityEngine;
 using Photon;
 using ExitGames.Client.Photon;
 using System.Linq;
-using DG.Tweening;
 
 namespace BattleScene
 {
