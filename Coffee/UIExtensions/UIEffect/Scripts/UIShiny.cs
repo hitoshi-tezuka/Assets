@@ -332,11 +332,19 @@ namespace Coffee.UIExtensions
 			m_Play = true;
 		}
 
+        /// <summary>
+        /// stop effect.
+        /// </summary>
+        public void Stop()
+        {
+            _time = 0;
+            m_Play = false;
+        }
 
-		//################################
-		// Private Members.
-		//################################
-		float _time = 0;
+        //################################
+        // Private Members.
+        //################################
+        float _time = 0;
 
 		void Update()
 		{

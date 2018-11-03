@@ -6,27 +6,39 @@ using System.Linq;
 
 namespace BattleScene {
 
-	/// <summary>
-	/// デッキ
-	/// </summary>
-	public class Deck:MonoBehaviour {
-		[SerializeField] private CoinCard   m_CoinCard;         // コインカード
-		[SerializeField] private ActionCard m_ActionCard;       // アクションカード
-		[SerializeField] private PointCard  m_PointCard;        // 領地カード
+    /// <summary>
+    /// デッキ
+    /// </summary>
+    public class Deck : MonoBehaviour {
+        [SerializeField] private CoinCard m_CoinCard;         // コインカード
+        [SerializeField] private ActionCard m_ActionCard;       // アクションカード
+        [SerializeField] private PointCard m_PointCard;        // 領地カード
 
         private List<Card> m_CardList = new List<Card>();
-		private CardBuilder m_CardBulider;
+        private CardBuilder m_CardBulider;
 
         private void Start()
         {
             m_CardBulider = new CardBuilder();
         }
 
+        
+        /// <summary>
+        /// カード追加処理(デッキ先頭に追加）
+        /// </summary>
+        /// <param name="card"></param>
+        public Card AddCardToFirst(Entity_CardMaster.CardMasterData cardMasterData)
+        {
+            var card = m_CardBulider.CreateCardObject(cardMasterData, true);
+            m_CardList.Insert(0,card);
+            return card;
+        }
+
         /// <summary>
         /// カード追加処理
         /// </summary>
         /// <param name="card"></param>
-        public Card AddCard(Card card)
+        private Card AddCard(Card card)
 		{
 			m_CardList.Add(card);
             return card;
@@ -51,17 +63,18 @@ namespace BattleScene {
         public Card[] GetCard(int num, List<Card> alreadyCards = null)
         {
             List<Card> cards = new List<Card>();
-            int i = 0;
             var deckCardList = m_CardList.FindAll(x => x.IsDeck && !(alreadyCards != null && alreadyCards.Contains(x)));
             if (deckCardList.Count < num) 
             {
                 cards.AddRange(deckCardList);
                 var n = num - deckCardList.Count;
                 CleanUp();
+                Shuffle();
                 cards.AddRange(GetCard(n, deckCardList));
             }
             else
-            { 
+            {
+                int i = 0;
                 while (i<num)
                 {
                     cards.Add(deckCardList[i]);
@@ -110,7 +123,6 @@ namespace BattleScene {
                     card.UpdateState(Card.CardState.DECK);
                 }
             }
-            Shuffle();
         }
 	}
 }

@@ -63,6 +63,7 @@ namespace BattleScene {
         { get { return this.transform.Find("StageCanvas/Stage/Field"); } }
         public Transform SupplyTransform
         { get { return this.transform.Find("StageCanvas/Stage/Supply/Scroll View/Content"); } }
+        public Supply Supply => m_Supply;
         #endregion
 
         private void Awake()
@@ -74,7 +75,6 @@ namespace BattleScene {
         void Start () {
             Entity_CardMaster card = Resources.Load<Entity_CardMaster>("CardData");
             card.Card.ForEach(x => { m_card.Add(x); Debug.Log(x.Card); });
-
             // シリアライザ登録
             DataSerializer<Entity_CardMaster.CardMasterData>.Register('C');
             DataSerializer<Player.PlayerStatus>.Register('S');

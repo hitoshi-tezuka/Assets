@@ -35,6 +35,7 @@ namespace BattleScene {
             REACTION = 42
         }
 
+        // dataへのアクセス制限を行わないとデータを変更されてしまう。
         public Entity_CardMaster.CardMasterData Data { get; private set; }
         public string CardId { get { return Data.Card; } }
         public int CostCoin { get { return Data.CostCoin; } }
@@ -53,6 +54,7 @@ namespace BattleScene {
         public bool IsDiscard { get { return State.Equals(CardState.DISCARD); } }
         public bool IsRevocation { get { return State.Equals(CardState.REVOCATION); } }
         public bool IsAction { get { return (Data.CardType == CardType.ACTION || Data.CardType == CardType.ATTACKACTION || Data.CardType == CardType.REACTION); } }
+        public bool IsSelect { get; set; }
         private bool IsScroll { get { return IsHand || IsSupply || IsField; } }
         public int Supply { get { return m_Supply; } set { UpdateSupply(value); } }
 
@@ -239,14 +241,15 @@ namespace BattleScene {
             {
                 var player =  BattleSceneManager.SceneManager.NowPlayer;
                 player.PurchaseCard(this);
+                m_UiShiny.Stop();
                 return;
             }
             if (IsSupply)
             {
+                var player = BattleSceneManager.SceneManager.NowPlayer;
+                if (player.Money < this.CostCoin) return;
                 m_UiShiny.Play();
             }
         }
-
-
     }
 } 

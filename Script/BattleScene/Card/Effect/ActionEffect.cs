@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Threading.Tasks;
+using UniRx.Async;
 
 namespace BattleScene { 
 	public class ActionEffect : Effect {
@@ -36,8 +37,9 @@ namespace BattleScene {
 
         }
 
-		public override void ActivateEffect(Player player)
+		public override void ActivateEffect(Player player, Player[] otherPlayers = null)
 		{
+            UniTask task;
             switch(m_CardId)
             {
                 case ADVENTURER:
@@ -45,8 +47,7 @@ namespace BattleScene {
                         あなたの山札から財宝カード２枚が公開されるまで、カードを公開する。
                         公開した財宝カード２枚を手札に加え、他の公開したカードは捨て札に置く。
                     */
-                    
-                    var task = AdventureEffect(player);
+                    task = AdventureEffect(player);
                     break;
 
                 case BUREAUCRAT:
@@ -54,20 +55,21 @@ namespace BattleScene {
                         銀貨を獲得し、デッキの上に置く。
                         他のプレイヤーは全員、各自の手札から勝利点カードを１枚公開し、各自のデッキの上に置く。（手札に勝利点カードがない場合、手札を公開する。）
                     */
-
+                    task = BureaucratEffect(player, otherPlayers);
                     break;
                 case CELLAR:
                     /*
                         ＋１アクション
                         手札から好きな枚数のカードを捨て札にし、その枚数分だけデッキからカードを引く。
                     */
-
+                    task = CellarEffect(player);
                     break;
                 case CHANCELLOR:
                     /*
                         ＋２コイン
                         あなたの山札のカードすべてを、即座に捨て札に置くことができる。
                     */
+
                     break;
                 case CHAPEL:
                     /*
@@ -187,26 +189,26 @@ namespace BattleScene {
             }
 		}
 
-        private async Task AdventureEffect(   Player player)
+        private async UniTask AdventureEffect(   Player player)
         {
             Debug.Log("冒険者の効果を発動");
             //var getCardList = new List<Card>();
             //var disCard = new List<Card>();
+            player.SetActivePublicDrawCard(true);
             int i = 0;
             while (i < 2)
             {
-
                 // プレイヤーカードのドローを行う
                 var card = player.DrawCard(1)[0];
+
                 card.UpdateState(Card.CardState.PUBLICDRAWCARD);
 
-                await Task.Delay(1000);
+                await UniTask.Delay(1000);
                
                 Debug.Log(card.CardId + " i +" + i);    
                 // 財宝カードだった場合、カウント+1
                 if (card.Type == Card.CardType.TREASURE)
                 {
-
                     card.UpdateState(Card.CardState.HAND);
                     //getCardList.Add(card);
                     i++;
@@ -221,7 +223,61 @@ namespace BattleScene {
             Debug.Log("冒険者効果終了");
             //getCardList.ForEach(x => x.UpdateState(Card.CardState.HAND));
             //disCard.ForEach(x => x.UpdateState(Card.CardState.DISCARD));
+            player.SetActivePublicDrawCard(false);
         }
 
+        private async UniTask BureaucratEffect(Player player, Player[] otherPlayer)
+        {
+            Debug.Log("役人の効果を発動");
+            var supply = BattleSceneManager.SceneManager.Supply;
+            player.AddCardToDeck(supply.GetSupplyCard(ConstCardName.Silver.ToString()));
+
+            bool IsPublicAllCard = true;
+
+            foreach(var other in otherPlayer)
+            {
+                other.SetActivePublicDrawCard(true);
+                List<Card> handCard = new List<Card>();
+                foreach (Card card in BattleSceneManager.SceneManager.PlayersTransform.Find(other.OwnerPlayer.ID.ToString() + "/Hand/Content"))
+                {
+                    if(card.Data.CardType == Card.CardType.VICTORYPOINT)
+                    {
+                        card.UpdateState(Card.CardState.PUBLICDRAWCARD);
+                        IsPublicAllCard = false;
+                        break;
+                    }
+                    handCard.Add(card);
+                }
+
+                if(IsPublicAllCard)
+                {
+                    int i = 0;
+
+                    while(i<2)
+                    { 
+                        foreach(var card in handCard)
+                        {
+                            if(i==0)
+                            {
+                                other.SetActivePublicDrawCard(true);
+                                await Task.Delay(10000);
+                            }else
+                            {
+                                card.UpdateState(Card.CardState.HAND);
+                            }
+                        }
+                        i++;
+                    }
+                }
+            }
+        }
+
+        private async UniTask CellarEffect(Player player)
+        {
+            Debug.Log("地下貯蔵庫の効果を発動");
+
+
+
+        }
     }
 }

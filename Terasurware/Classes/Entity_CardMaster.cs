@@ -9,8 +9,8 @@ public class Entity_CardMaster : ScriptableObject
 
 	[System.SerializableAttribute]
 	public class CardMasterData
-	{
-		public string Card;
+    {
+        public string Card;
 		public string ImageName;
 		public string CardName;
 		public int SetType;

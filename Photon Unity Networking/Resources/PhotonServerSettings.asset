@@ -47,4 +47,5 @@ MonoBehaviour:
   - SyncState
   - SyncStatus
   - SyncSupply
+  - SyncPublicDrawCard
   DisableAutoOpenWizard: 1

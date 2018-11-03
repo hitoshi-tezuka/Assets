@@ -1,11 +1,12 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using UniRx.Async;
 using UnityEngine;
 using UnityEngine.UI;
-using Database;
-using System;
 
-namespace BattleScene {
+namespace BattleScene
+{
     public class Player : Photon.MonoBehaviour {
 
 		[SerializeField]
@@ -14,15 +15,17 @@ namespace BattleScene {
 		private Status m_Status;
         [SerializeField]
         private Deck m_Deck;
-        [SerializeField] private ScrollRect m_PublicDrawCard;
+        [SerializeField] private ScrollRect m_PublicCardSheet;
+        [SerializeField] private ScrollRect m_PrivateCardSheet;
 
-		private BattleSceneManager.PlayerTurn m_ProcessingTurn;
+        private BattleSceneManager.PlayerTurn m_ProcessingTurn;
         private const int CLEANUPCARDNUM = 5;
         private PlayerStatus m_PlayerStatus;
         private List<Card> m_HandCard;
 
         public Action<Player> PhotonInstantiateCallback { get; set; }
         public PhotonPlayer OwnerPlayer { get; private set; }
+        public int Money => m_PlayerStatus.Money;
 
 		/// <summary>
 		/// プレイヤーステータス情報
@@ -71,6 +74,7 @@ namespace BattleScene {
             SyncStatus();
         }
 
+
         private void SyncStatus()
         {
             photonView.RPC("SyncStatus", PhotonTargets.AllBuffered, m_PlayerStatus);
@@ -99,6 +103,23 @@ namespace BattleScene {
             m_Status.UpdateStatus(status);
         }
 
+        public void SetActivePublicDrawCard(bool flg)
+        {
+            photonView.RPC("SyncPublicDrawCard", PhotonTargets.AllBuffered, flg);
+        }
+
+        [PunRPC]
+        private void SyncPublicDrawCard(bool active)
+        {
+            m_PublicCardSheet.gameObject.SetActive(active);
+        }
+
+        public void AddCardToDeck(Card card)
+        {
+            var cardCont = m_Deck.AddCardToFirst(card.Data);
+            cardCont.UpdateState(Card.CardState.DECK);
+        }
+
         public void EndTurn()
         {
             CleanUpStatus();
@@ -116,6 +137,30 @@ namespace BattleScene {
                 cardList.Add(card);
             }
             return cardList;
+        }
+
+        public async UniTask<List<Card>> GetSelectCard()
+        {
+            var selectCard = new List<Card>();
+
+            // カード選択されるまで待機
+            await SelectCard();
+
+            foreach(Card card in m_HandCard)
+            {
+                if (card.IsSelect) selectCard.Add(card);
+            }
+
+            return selectCard;
+        }
+
+        private async UniTask SelectCard()
+        {
+            m_PrivateCardSheet.gameObject.SetActive(true);
+
+            
+
+            m_PrivateCardSheet.gameObject.SetActive(false);
         }
 
         private void OnPhotonInstantiate(PhotonMessageInfo info)
@@ -150,7 +195,6 @@ namespace BattleScene {
             {
                 card.UpdateState(Card.CardState.DISCARD);
             }
-
             m_HandCard.Clear();
         }
     }
